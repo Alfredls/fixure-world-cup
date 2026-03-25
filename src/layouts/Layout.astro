@@ -1,16 +1,12 @@
 ---
-import '../styles/global.css';
+import Header from "../components/Header.astro";
+import "../styles/global.css";
 
 interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
-
-const pathname = new URL(Astro.request.url).pathname;
-const isHome = pathname === '/' || pathname === '/index.html';
-const isGroups = pathname.startsWith('/grupos') || pathname.startsWith('/grupo/');
-const isHistorial = pathname.startsWith('/historial') || pathname.startsWith('/bracket');
 ---
 
 <!doctype html>
@@ -29,42 +25,12 @@ const isHistorial = pathname.startsWith('/historial') || pathname.startsWith('/b
       rel="stylesheet"
     />
   </head>
-  <body class="bg-[#111] text-white font-inter min-h-screen flex flex-col relative">
-    
-    <!-- Top Header Navigation -->
-    <header class="w-full h-[80px] z-[100] border-b border-white/5 bg-[#111]/80 backdrop-blur-md sticky top-0">
-      <nav class="max-w-[1400px] mx-auto h-full flex items-center justify-between px-6 lg:px-12">
-        <!-- Logo -->
-        <a href="/" class="font-bebas text-3xl tracking-widest text-[#ceab52] mt-2">
-          WORLD CUP
-        </a>
-        
-        <!-- Center Nav -->
-        <ul class="hidden md:flex items-center gap-10 h-full">
-          <li class="h-full flex items-center pt-2">
-            <a href="/" class={`text-sm tracking-wide ${isHome ? 'text-[#ceab52] border-b-2 border-[#ceab52] pb-[8px]' : 'text-white/80 hover:text-white transition-colors pb-2 cursor-pointer'}`}>Partidos</a>
-          </li>
-          <li class="h-full flex items-center pt-2">
-            <a href="/partidos" class={`text-sm tracking-wide ${pathname.startsWith('/partidos') ? 'text-[#ceab52] border-b-2 border-[#ceab52] pb-[8px]' : 'text-white/80 hover:text-white transition-colors pb-2 cursor-pointer'}`}>Calendario</a>
-          </li>
-          <li class="h-full flex items-center pt-2">
-            <a href="/grupos" class={`text-sm tracking-wide ${isGroups ? 'text-[#ceab52] border-b-2 border-[#ceab52] pb-[8px]' : 'text-white/80 hover:text-white transition-colors pb-2 cursor-pointer'}`}>Grupos</a>
-          </li>
-          <li class="h-full flex items-center pt-2">
-            <a href="/historial" class={`text-sm tracking-wide ${isHistorial ? 'text-[#ceab52] border-b-2 border-[#ceab52] pb-[8px]' : 'text-white/80 hover:text-white transition-colors pb-2 cursor-pointer'}`}>Historial</a>
-          </li>
-        </ul>
-        
-        <!-- Right Icon -->
-        <div class="text-white/70 hover:text-white transition-colors cursor-pointer pt-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-        </div>
-      </nav>
-    </header>
+  <body class="bg-[#111] text-white font-inter min-h-screen flex flex-col relative" >
 
-    <main class="flex-1 w-full max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col relative z-20 py-8 lg:py-12">
+    <Header />
+
+    <main class="flex-1 w-full max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col relative z-20 py-8 lg:py-12" >
       <slot />
     </main>
-
   </body>
 </html>

@@ -1,0 +1,79 @@
+---
+const pathname = new URL(Astro.request.url).pathname;
+const isHome = pathname === "/" || pathname === "/index.html";
+const isGroups =
+  pathname.startsWith("/grupos") || pathname.startsWith("/grupo/");
+const isHistorial =
+  pathname.startsWith("/historial") || pathname.startsWith("/bracket");
+
+const dataMenu = [
+  {
+    name: "Inicio",
+    url: "/",
+    isActive: isHome,
+  },
+  {
+    name: "Calendario",
+    url: "/partidos",
+    isActive: pathname.startsWith("/partidos"),
+  },
+  {
+    name: "Grupos",
+    url: "/grupos",
+    isActive: isGroups,
+  },
+  {
+    name: "Historial",
+    url: "/historial",
+    isActive: isHistorial,
+  },
+];
+---
+
+<!-- Top Header Navigation -->
+<header  class="w-full h-[80px] z-[100] border-b border-white/5 bg-[#111]/80 backdrop-blur-md sticky top-0"
+>
+  <nav
+    class="max-w-[1400px] mx-auto h-full flex items-center justify-between px-6 lg:px-12"
+  >
+    <!-- Logo -->
+    <a href="/" class="font-bebas text-3xl tracking-widest text-[#ceab52] mt-2">
+      WORLD CUP
+    </a>
+
+    <!-- Center Nav -->
+    <ul class="hidden md:flex items-center gap-10 h-full">
+      {
+        dataMenu.map((item) => (
+          <li class="h-full flex items-center pt-2">
+            <a
+              href={item.url}
+              class={`text-sm tracking-wide ${item.isActive ? "text-[#ceab52] border-b-2 border-[#ceab52] pb-[8px]" : "text-white/80 hover:text-white transition-colors pb-2 cursor-pointer"}`}
+            >
+              {item.name}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <!-- Right Icon -->
+    <div
+      class="text-white/70 hover:text-white transition-colors cursor-pointer pt-2"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"
+        ></path></svg
+      >
+    </div>
+  </nav>
+</header>
