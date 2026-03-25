@@ -1,0 +1,52 @@
+---
+interface Props {
+	homeTeam: { name: string; flag: string };
+	awayTeam: { name: string; flag: string };
+	homeScore?: number;
+	awayScore?: number;
+	date: string;
+	time: string;
+	venue: string;
+	status: 'scheduled' | 'live' | 'finished';
+}
+
+const { homeTeam, awayTeam, homeScore, awayScore, date, time, venue, status } = Astro.props;
+---
+
+<div class={`bg-dark-card p-4 rounded-xl border border-white/5 transition-all duration-300 hover:border-gold/30 hover:-translate-y-1 relative overflow-hidden flex flex-col ${status}`}>
+	<div class="flex justify-between text-[0.75rem] text-muted mb-4 uppercase tracking-widest">
+		<span class="venue">{venue}</span>
+		<span class="date">{date} - {time}</span>
+	</div>
+	
+	<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+		<div class="flex items-center gap-3 font-bold justify-end">
+			<span class="text-3xl sm:text-[1.8rem]">{homeTeam.flag}</span>
+			<span class="hidden sm:inline">{homeTeam.name}</span>
+		</div>
+		
+		<div class="bg-black/30 px-4 py-2 rounded-lg min-w-[80px] text-center">
+			{status === 'scheduled' ? (
+				<span class="font-bebas text-xl text-gold">VS</span>
+			) : (
+				<div class="font-bebas text-3xl flex justify-center gap-2">
+					<span>{homeScore}</span>
+					<span class="opacity-50">-</span>
+					<span>{awayScore}</span>
+				</div>
+			)}
+		</div>
+		
+		<div class="flex items-center gap-3 font-bold justify-start">
+			<span class="hidden sm:inline">{awayTeam.name}</span>
+			<span class="text-3xl sm:text-[1.8rem]">{awayTeam.flag}</span>
+		</div>
+	</div>
+
+	{status === 'live' && (
+		<div class="absolute bottom-0 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[0.6rem] px-2 py-0.5 rounded-t font-black animate-pulse">
+			EN VIVO
+		</div>
+	)}
+</div>
+

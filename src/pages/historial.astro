@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Historial">
+	<header class="text-center mb-12">
+		<h1 class="text-4xl md:text-6xl mb-2 font-bebas text-white">HISTORIAL DEL TORNEO</h1>
+		<p class="text-muted text-lg">Resultados previos y camino a la gloria.</p>
+	</header>
+
+	<div class="w-full overflow-x-auto bg-[#1c1c1e]/50 rounded-3xl p-8 border border-white/5">
+		<div class="flex min-w-[1400px] gap-8">
+			<!-- Ronda de 32 -->
+			<div class="flex-1 flex flex-col gap-8">
+				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">DIECISEISAVOS</div>
+				<div class="flex flex-col justify-around h-full gap-6">
+					{[...Array(16)].map((_, i) => (
+						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px]">
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0 text-[#ceab52] bg-[#ceab52]/10">
+								<span class="opacity-60">1A</span> 🏆
+							</div>
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
+								<span class="opacity-60">2B</span>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+
+			<!-- Octavos -->
+			<div class="flex-1 flex flex-col gap-8">
+				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">OCTAVOS</div>
+				<div class="flex flex-col justify-around h-full gap-6">
+					{[...Array(8)].map((_, i) => (
+						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px] h-[100px] flex flex-col justify-center">
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
+								<span class="opacity-60">W33</span>
+							</div>
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
+								<span class="opacity-60">W34</span>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+
+			<!-- Cuartos -->
+			<div class="flex-1 flex flex-col gap-8">
+				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">CUARTOS</div>
+				<div class="flex flex-col justify-around h-full gap-6">
+					{[...Array(4)].map((_, i) => (
+						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px] h-[220px] flex flex-col justify-center">
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
+								<span class="opacity-60">W49</span>
+							</div>
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
+								<span class="opacity-60">W50</span>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+
+			<!-- Semis -->
+			<div class="flex-1 flex flex-col gap-8">
+				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">SEMIFINAL</div>
+				<div class="flex flex-col justify-around h-full gap-6">
+					{[...Array(2)].map((_, i) => (
+						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px] h-[460px] flex flex-col justify-center">
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
+								<span class="opacity-60">W57</span>
+							</div>
+							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
+								<span class="opacity-60">W58</span>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+
+			<!-- Final -->
+			<div class="flex-1 flex flex-col gap-8">
+				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">FINAL</div>
+				<div class="flex flex-col justify-around h-full gap-6">
+					<div class="bg-[#1c1c1e] border-2 border-gold rounded-md overflow-hidden w-[180px] h-[200px] flex flex-col justify-center bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.1)_0%,transparent_80%)]">
+						<div class="text-5xl text-center mb-4">🏆</div>
+						<div class="px-4 py-2 font-bold flex justify-between border-b border-white/5 last:border-b-0 text-gold text-base p-4">
+							<span class="opacity-60">W61</span>
+						</div>
+						<div class="px-4 py-2 font-bold flex justify-between border-b border-white/5 last:border-b-0 text-gold text-base p-4">
+							<span class="opacity-60">W62</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</Layout>

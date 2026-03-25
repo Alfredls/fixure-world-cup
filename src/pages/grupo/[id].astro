@@ -1,0 +1,100 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import StandingsTable from '../../components/StandingsTable.astro';
+import MatchCard from '../../components/MatchCard.astro';
+import { supabase } from '../../lib/supabase';
+
+export async function getStaticPaths() {
+	const groups = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+	return groups.map(id => ({ params: { id } }));
+}
+
+const { id } = Astro.params;
+
+// 1. Obtener datos del grupo de Supabase
+let groupName = `GRUPO ${id}`;
+let standings: any[] = [];
+let matches: any[] = [];
+
+const { data: groupData, error: groupError } = await supabase
+	.from('groups')
+	.select('*, teams(*)')
+	.eq('id', id)
+	.single();
+
+if (!groupError && groupData) {
+    groupName = groupData.name;
+    // Standings mock (se calcularían de los partidos en una app real o vendrían de otra tabla)
+    standings = groupData.teams.map((t: any) => ({
+        team: { name: t.name, flag: t.flag_emoji },
+        played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
+    }));
+
+    // Obtener partidos del grupo
+    const teamIds = groupData.teams.map((t: any) => t.id);
+    const { data: matchesData } = await supabase
+        .from('matches')
+        .select(`
+            *,
+            home_team:teams!home_team_id(name, flag_emoji),
+            away_team:teams!away_team_id(name, flag_emoji)
+        `)
+        .or(`home_team_id.in.(${teamIds.join(',')}),away_team_id.in.(${teamIds.join(',')})`);
+
+    if (matchesData && matchesData.length > 0) {
+        matches = matchesData.map((m: any) => {
+            const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
+            const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+            return {
+                homeTeam: { name: home?.name || 'TBD', flag: home?.flag_emoji || '❔' },
+                awayTeam: { name: away?.name || 'TBD', flag: away?.flag_emoji || '❔' },
+                date: m.date,
+                time: m.time,
+                venue: m.venue,
+                status: m.status
+            };
+        });
+    }
+}
+
+// Fallback si no hay datos en Supabase
+if (standings.length === 0) {
+    standings = [
+        { team: { name: 'México', flag: '🇲🇽' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
+        { team: { name: 'Sudáfrica', flag: '🇿🇦' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
+        { team: { name: 'Corea Sur', flag: '🇰🇷' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
+        { team: { name: 'UEFA PO D', flag: '🇪🇺' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
+    ];
+}
+
+if (matches.length === 0) {
+    matches = [
+        { homeTeam: { name: 'México', flag: '🇲🇽' }, awayTeam: { name: 'Sudáfrica', flag: '🇿🇦' }, date: '11 Jun', time: '18:00', venue: 'Estadio Azteca', status: 'scheduled' },
+        { homeTeam: { name: 'Corea Sur', flag: '🇰🇷' }, awayTeam: { name: 'UEFA PO D', flag: '🇪🇺' }, date: '12 Jun', time: '15:00', venue: 'Stade de la Beaujoire', status: 'scheduled' },
+    ];
+}
+---
+
+<Layout title={groupName}>
+	<a href="/grupos" class="no-underline text-muted font-semibold text-sm inline-block mb-8 transition-colors duration-300 hover:text-gold">← Volver a Grupos</a>
+	
+	<header class="mb-16">
+		<h1 class="text-5xl md:text-7xl text-gold font-bebas mb-[-10px]">{groupName}</h1>
+		<p class="text-muted text-xl">Posiciones y próximos encuentros del grupo {id}.</p>
+	</header>
+
+	<section class="mb-16">
+		<h2 class="text-3xl font-bebas mb-6 border-l-4 border-green-accent pl-4">TABLA DE POSICIONES</h2>
+		<StandingsTable standings={standings} />
+	</section>
+
+	<section class="mb-16">
+		<h2 class="text-3xl font-bebas mb-6 border-l-4 border-green-accent pl-4">PARTIDOS DEL GRUPO</h2>
+		<div class="flex flex-col gap-6">
+			{matches.map(match => (
+				<MatchCard {...match} />
+			))}
+		</div>
+	</section>
+</Layout>
+

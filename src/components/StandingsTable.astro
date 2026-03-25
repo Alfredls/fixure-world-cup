@@ -1,0 +1,60 @@
+---
+interface Standing {
+	team: { name: string; flag: string };
+	played: number;
+	won: number;
+	drawn: number;
+	lost: number;
+	gf: number;
+	ga: number;
+	gd: number;
+	pts: number;
+}
+
+interface Props {
+	standings: Standing[];
+}
+
+const { standings } = Astro.props;
+---
+
+<div class="w-full overflow-x-auto bg-dark-card rounded-xl border border-white/5">
+	<table class="w-full border-collapse text-sm">
+		<thead>
+			<tr class="bg-black/20 text-muted font-bold text-[0.75rem] uppercase tracking-widest">
+				<th class="p-4">POS</th>
+				<th class="p-4 text-left">EQUIPO</th>
+				<th class="p-4">PJ</th>
+				<th class="p-4">G</th>
+				<th class="p-4">E</th>
+				<th class="p-4">P</th>
+				<th class="p-4 hidden sm:table-cell">GF</th>
+				<th class="p-4 hidden sm:table-cell">GC</th>
+				<th class="p-4 hidden sm:table-cell">DG</th>
+				<th class="p-4 font-black text-gold">PTS</th>
+			</tr>
+		</thead>
+		<tbody>
+			{standings.map((row, index) => (
+				<tr class={`border-b border-white/5 last:border-b-0 ${index < 2 ? 'bg-gradient-to-r from-green-accent/5 to-transparent' : ''}`}>
+					<td class={`p-4 ${index < 2 ? 'border-l-4 border-green-accent' : ''}`}>{index + 1}</td>
+					<td class="p-4 text-left">
+						<div class="flex items-center gap-3 font-semibold">
+							<span class="text-lg">{row.team.flag}</span>
+							<span>{row.team.name}</span>
+						</div>
+					</td>
+					<td class="p-4">{row.played}</td>
+					<td class="p-4">{row.won}</td>
+					<td class="p-4">{row.drawn}</td>
+					<td class="p-4">{row.lost}</td>
+					<td class="p-4 hidden sm:table-cell">{row.gf}</td>
+					<td class="p-4 hidden sm:table-cell">{row.ga}</td>
+					<td class="p-4 hidden sm:table-cell">{row.gd}</td>
+					<td class="p-4 font-black text-gold">{row.pts}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+</div>
+

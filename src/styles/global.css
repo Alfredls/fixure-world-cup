@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #ceab52; /* Reference image gold */
+  --color-dark-bg: #111111; /* Almost black */
+  --color-dark-card: #1c1c1e; /* Dark grey */
+  --color-muted: #888888;
+  
+  --font-bebas: "Bebas Neue", cursive;
+  --font-inter: "Inter", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-inter bg-dark-bg text-white min-h-screen flex flex-col;
+  }
+  
+  h1, h2, h3 {
+    @apply font-bebas tracking-wider;
+  }
+}

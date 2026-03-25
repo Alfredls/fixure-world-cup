@@ -1,0 +1,71 @@
+---
+---
+
+<section class="h-[80vh] flex items-center justify-center text-center relative overflow-hidden bg-[radial-gradient(circle_at_center,rgba(26,158,74,0.15)_0%,transparent_70%)] before:content-[''] before:absolute before:inset-0 before:bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] before:opacity-10 before:pointer-events-none">
+	<div class="max-w-[800px] z-10 px-6">
+		<h1 class="text-5xl md:text-8xl font-bebas leading-[0.9] mb-2 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+			EL FIXTURE DEL <span class="text-gold">MUNDIAL</span>
+		</h1>
+		<p class="text-lg md:text-xl text-muted tracking-[4px] font-semibold mb-12">
+			CANADA · MEXICO · UNITED STATES 2026
+		</p>
+
+		<div class="mb-12 flex flex-col items-center gap-2">
+			<div class="text-xs font-bold text-green-accent tracking-widest">FALTAN</div>
+			<div class="flex gap-4 md:gap-8 bg-dark-card/60 px-6 py-4 md:px-12 md:py-6 rounded-[20px] border border-gold/20 backdrop-filter blur-sm" id="timer">
+				<div class="flex flex-col items-center">
+					<span id="days" class="font-bebas text-4xl md:text-6xl text-white leading-none">000</span>
+					<label class="text-[0.7rem] text-muted font-bold">DÍAS</label>
+				</div>
+				<div class="flex flex-col items-center">
+					<span id="hours" class="font-bebas text-4xl md:text-6xl text-white leading-none">00</span>
+					<label class="text-[0.7rem] text-muted font-bold">HORAS</label>
+				</div>
+				<div class="flex flex-col items-center">
+					<span id="minutes" class="font-bebas text-4xl md:text-6xl text-white leading-none">00</span>
+					<label class="text-[0.7rem] text-muted font-bold">MIN</label>
+				</div>
+			</div>
+			<div class="text-xs font-bold text-green-accent tracking-widest">PARA EL PARTIDO INAUGURAL</div>
+		</div>
+
+		<div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
+			<a href="/grupos" class="px-10 py-4 rounded-full no-underline font-bold text-base transition-all duration-300 uppercase tracking-wider bg-gold text-black hover:bg-white hover:scale-105 text-center">
+				VER GRUPOS
+			</a>
+			<a href="/partidos" class="px-10 py-4 rounded-full no-underline font-bold text-base transition-all duration-300 uppercase tracking-wider border-2 border-white text-white hover:bg-white hover:text-black hover:scale-105 text-center">
+				CALENDARIO
+			</a>
+		</div>
+	</div>
+</section>
+
+<script>
+	const targetDate = new Date("June 11, 2026 00:00:00").getTime();
+
+	// Cache elements to improve performance and avoid "possibly null" errors
+	const daysEl = document.getElementById("days");
+	const hoursEl = document.getElementById("hours");
+	const minutesEl = document.getElementById("minutes");
+
+	function updateTimer() {
+		const now = new Date().getTime();
+		const diff = targetDate - now;
+
+		if (diff <= 0) return;
+
+		const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+		const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+		const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+		// Check if elements exist before updating innerText
+		if (daysEl) daysEl.innerText = d.toString().padStart(3, "0");
+		if (hoursEl) hoursEl.innerText = h.toString().padStart(2, "0");
+		if (minutesEl) minutesEl.innerText = m.toString().padStart(2, "0");
+	}
+
+	// Update every minute, and run once immediately on load
+	setInterval(updateTimer, 1000 * 60);
+	updateTimer();
+</script>
+

@@ -1,0 +1,100 @@
+---
+import Layout from '../layouts/Layout.astro';
+import MatchCard from '../components/MatchCard.astro';
+import { supabase } from '../lib/supabase';
+
+// Intentar obtener datos de Supabase
+let matches = [];
+const { data: matchesData, error } = await supabase
+    .from('matches')
+    .select(`
+        id,
+        date,
+        time,
+        venue,
+        status,
+        phase,
+        home_team:teams!home_team_id(name, flag_emoji),
+        away_team:teams!away_team_id(name, flag_emoji)
+    `)
+    .order('date', { ascending: true });
+
+if (!error && matchesData && matchesData.length > 0) {
+    // Transformar datos para que coincidan con la estructura esperada por los componentes
+    matches = matchesData.map(m => {
+        const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
+        const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+        
+        return {
+            id: m.id,
+            homeTeam: { name: home?.name || 'TBD', flag: home?.flag_emoji || '❔' },
+            awayTeam: { name: away?.name || 'TBD', flag: away?.flag_emoji || '❔' },
+            date: m.date,
+            time: m.time,
+            venue: m.venue,
+            phase: m.phase,
+            status: m.status
+        };
+    });
+} else {
+    // Datos de prueba si no hay en DB
+    matches = [
+        { id: 1, homeTeam: { name: 'México', flag: '🇲🇽' }, awayTeam: { name: 'Sudáfrica', flag: '🇿🇦' }, date: '11 Jun', time: '18:00', venue: 'Estadio Azteca', phase: 'Grupos (A)', status: 'scheduled' },
+        { id: 2, homeTeam: { name: 'Canadá', flag: '🇨🇦' }, awayTeam: { name: 'Suiza', flag: '🇨🇭' }, date: '12 Jun', time: '15:00', venue: 'BMO Field', phase: 'Grupos (B)', status: 'scheduled' },
+        { id: 3, homeTeam: { name: 'EE.UU.', flag: '🇺🇸' }, awayTeam: { name: 'Paraguay', flag: '🇵🇾' }, date: '12 Jun', time: '21:00', venue: 'Lumen Field', phase: 'Grupos (D)', status: 'scheduled' },
+        { id: 4, homeTeam: { name: 'Brasil', flag: '🇧🇷' }, awayTeam: { name: 'Haití', flag: '🇭🇹' }, date: '13 Jun', time: '20:00', venue: 'MetLife Stadium', phase: 'Grupos (C)', status: 'scheduled' },
+    ];
+}
+
+const phases = ['Todos', 'Fase de Grupos', 'Dieciseisavos', 'Octavos', 'Cuartos', 'Semifinal', 'Final'];
+---
+
+<Layout title="Partidos">
+	<header class="text-center mb-12">
+		<h1 class="text-4xl md:text-6xl mb-2 font-bebas">CALENDARIO DE PARTIDOS</h1>
+		<p class="text-muted text-lg">Sigue todos los encuentros del torneo día a día.</p>
+	</header>
+
+	<div class="bg-dark-card p-6 rounded-xl mb-12 border border-white/5">
+		<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+			<label class="font-bold text-gold text-xs uppercase tracking-widest">Fase:</label>
+			<div class="flex gap-3 overflow-x-auto pb-2 w-full no-scrollbar">
+				{phases.map(p => (
+					<button class={`border border-white/10 px-5 py-2 rounded-full whitespace-nowrap text-[0.85rem] font-semibold transition-all hover:bg-[#ceab52] hover:text-black hover:border-transparent ${p === 'Todos' ? 'bg-[#ceab52] text-black border-transparent' : 'bg-white/5 text-white'}`}>
+						{p}
+					</button>
+				))}
+			</div>
+		</div>
+	</div>
+
+	<div class="flex flex-col gap-12">
+		<div class="day-group">
+			<div class="font-bebas text-3xl text-white mb-4 border-b-2 border-gold inline-block">Jueves 11 de Junio</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				{matches.filter(m => m.date === '11 Jun').map(m => (
+					<MatchCard {...m} />
+				))}
+			</div>
+		</div>
+		
+		<div class="day-group">
+			<div class="font-bebas text-3xl text-white mb-4 border-b-2 border-gold inline-block">Viernes 12 de Junio</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				{matches.filter(m => m.date === '12 Jun').map(m => (
+					<MatchCard {...m} />
+				))}
+			</div>
+		</div>
+
+        <div class="day-group">
+			<div class="font-bebas text-3xl text-white mb-4 border-b-2 border-gold inline-block">Sábado 13 de Junio</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				{matches.filter(m => m.date === '13 Jun').map(m => (
+					<MatchCard {...m} />
+				))}
+			</div>
+		</div>
+	</div>
+</Layout>
+
