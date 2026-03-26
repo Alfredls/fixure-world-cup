@@ -22,8 +22,12 @@ const { homeTeam, awayTeam, score, status, penalties } = Astro.props;
     
     <!-- Home Team Logo -->
     <div class="flex flex-col items-center">
-      <div class="w-32 h-32 md:w-56 md:h-56 rounded-full bg-[#2a5b7c] flex items-center justify-center shadow-2xl relative Z-10">
-        <span class="text-6xl md:text-8xl">{homeTeam.flag}</span>
+      <div class="w-32 h-32 md:w-56 md:h-56 rounded-full bg-[#2a5b7c] flex items-center justify-center shadow-2xl relative Z-10 overflow-hidden">
+        {homeTeam.flag.endsWith('.png') ? (
+          <img src={`/flags/${homeTeam.flag}`} alt={homeTeam.name} class="w-full h-full object-cover" />
+        ) : (
+          <span class="text-6xl md:text-8xl">{homeTeam.flag}</span>
+        )}
       </div>
     </div>
 
@@ -38,8 +42,12 @@ const { homeTeam, awayTeam, score, status, penalties } = Astro.props;
 
     <!-- Away Team Logo -->
     <div class="flex flex-col items-center">
-      <div class="w-32 h-32 md:w-56 md:h-56 rounded-full bg-[#1e2336] flex items-center justify-center shadow-2xl relative z-10">
-        <span class="text-6xl md:text-8xl">{awayTeam.flag}</span>
+      <div class="w-32 h-32 md:w-56 md:h-56 rounded-full bg-[#1e2336] flex items-center justify-center shadow-2xl relative z-10 overflow-hidden">
+        {awayTeam.flag.endsWith('.png') ? (
+          <img src={`/flags/${awayTeam.flag}`} alt={awayTeam.name} class="w-full h-full object-cover" />
+        ) : (
+          <span class="text-6xl md:text-8xl">{awayTeam.flag}</span>
+        )}
       </div>
     </div>
   </div>

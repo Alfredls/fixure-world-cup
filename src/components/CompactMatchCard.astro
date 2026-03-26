@@ -3,6 +3,7 @@ interface Props {
   homeTeam: { name: string; flag: string };
   awayTeam: { name: string; flag: string };
   score: { home: number; away: number };
+  penalties?: { home: number; away: number };
 }
 
 const { homeTeam, awayTeam, score } = Astro.props;
@@ -12,8 +13,12 @@ const { homeTeam, awayTeam, score } = Astro.props;
   <!-- Top Row: Logo - Score - Logo -->
   <div class="flex items-center justify-center gap-4 mb-2">
     <!-- Home Logo -->
-    <div class="w-10 h-10 rounded-full bg-[#2a5b7c] flex items-center justify-center text-xl shadow-lg shrink-0">
-      {homeTeam.flag}
+    <div class="w-10 h-10 rounded-full bg-[#2a5b7c] flex items-center justify-center text-xl shadow-lg shrink-0 overflow-hidden">
+      {homeTeam.flag.endsWith('.png') ? (
+        <img src={`/flags/${homeTeam.flag}`} alt={homeTeam.name} class="w-full h-full object-cover" />
+      ) : (
+        homeTeam.flag
+      )}
     </div>
     
     <!-- Score -->
@@ -24,17 +29,23 @@ const { homeTeam, awayTeam, score } = Astro.props;
     </div>
 
     <!-- Away Logo -->
-    <div class="w-10 h-10 rounded-full bg-[#1e2336] flex items-center justify-center text-xl shadow-lg shrink-0">
-      {awayTeam.flag}
+    <div class="w-10 h-10 rounded-full bg-[#1e2336] flex items-center justify-center text-xl shadow-lg shrink-0 overflow-hidden">
+      {awayTeam.flag.endsWith('.png') ? (
+        <img src={`/flags/${awayTeam.flag}`} alt={awayTeam.name} class="w-full h-full object-cover" />
+      ) : (
+        awayTeam.flag
+      )}
     </div>
   </div>
 
-  <!-- Middle Row: Penalties (Static mock for now to match image) -->
-  <div class="flex items-center justify-center gap-2 mb-2">
-    <div class="h-[1px] w-6 bg-gold/30"></div>
-    <span class="text-white/40 text-[0.5rem] tracking-[1px] uppercase font-bold">Penalties (4 - 2)</span>
-    <div class="h-[1px] w-6 bg-gold/30"></div>
-  </div>
+  <!-- Middle Row: Penalties -->
+  {Astro.props.penalties && (
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <div class="h-[1px] w-6 bg-gold/30"></div>
+      <span class="text-white/40 text-[0.5rem] tracking-[1px] uppercase font-bold">Penalties ({Astro.props.penalties.home} - {Astro.props.penalties.away})</span>
+      <div class="h-[1px] w-6 bg-gold/30"></div>
+    </div>
+  )}
 
   <!-- Bottom Row: Team Names -->
   <div class="flex justify-between px-2 w-full mt-1">

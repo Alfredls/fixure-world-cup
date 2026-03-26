@@ -4,106 +4,72 @@ import LiveMatch from "../components/LiveMatch.astro";
 import CompactMatchCard from "../components/CompactMatchCard.astro";
 import GroupNav from "../components/GroupNav.astro";
 
-import { supabase } from "../lib/supabase";
+import { getNextMatchDate, getMatchesByDate } from "../lib/db";
 
-// 1. Intentar obtener el partido EN VIVO de Supabase
+// 1. Obtener la fecha del próximo partido disponible (hoy o en el futuro)
+const today = new Date().toISOString().split('T')[0];
+const targetDate = await getNextMatchDate(today) || '2026-06-11';
+
+// 2. Obtener todos los partidos de esa fecha
+const matchesData = await getMatchesByDate(targetDate);
+  
+// 3. Preparar datos para los componentes
 let liveMatchData;
-const { data: liveData, error: liveError } = await supabase
-  .from("matches")
-  .select(
-    `
-        *,
-        home_team:teams!home_team_id(name, flag_emoji),
-        away_team:teams!away_team_id(name, flag_emoji)
-    `,
-  )
-  .eq("status", "live")
-  .limit(1);
+let dailyMatches = [];
 
-const liveMatchRow = liveData?.[0];
+if (matchesData && matchesData.length > 0) {
+  // El primer partido del día es el "Hero" (simulamos que es el principal)
+  const heroMatchRow = matchesData[0];
+  const home = heroMatchRow.home_team;
+  const away = heroMatchRow.away_team;
 
-if (!liveError && liveMatchRow) {
-  const home = Array.isArray(liveMatchRow.home_team)
-    ? liveMatchRow.home_team[0]
-    : liveMatchRow.home_team;
-  const away = Array.isArray(liveMatchRow.away_team)
-    ? liveMatchRow.away_team[0]
-    : liveMatchRow.away_team;
 
   liveMatchData = {
-    id: liveMatchRow.id,
+    id: heroMatchRow.id,
     homeTeam: {
       name: home?.name || "TBD",
-      flag: home?.name?.toUpperCase() || "❔",
+      flag: home?.flag_emoji || "unk.png",
     },
     awayTeam: {
       name: away?.name || "TBD",
-      flag: away?.name?.toUpperCase() || "❔",
+      flag: away?.flag_emoji || "unk.png",
     },
     score: {
-      home: liveMatchRow.home_score || 0,
-      away: liveMatchRow.away_score || 0,
+      home: heroMatchRow.home_score || 0,
+      away: heroMatchRow.away_score || 0,
     },
-    status: `LIVE MATCH • ${liveMatchRow.phase || "FINAL"} ${liveMatchRow.time || "85'"}`,
-    penalties: liveMatchRow.penalties || null,
+    status: `${heroMatchRow.match_date} • ${heroMatchRow.match_time} • ${heroMatchRow.phase?.toUpperCase() || "GRUPO"}`,
+    penalties: heroMatchRow.penalties || null,
   };
-} else {
-  // Mock matching the image exactly
-  liveMatchData = {
-    homeTeam: { name: "Argentina", flag: "ARGENTINA" },
-    awayTeam: { name: "France", flag: "FRANCE" },
-    score: { home: 3, away: 3 },
-    status: "LIVE MATCH • FINAL 85'",
-    penalties: { home: 4, away: 2 },
-  };
-}
 
-// 2. Intentar obtener otros partidos del día
-let dailyMatches = [];
-const { data: dailyData, error: dailyError } = await supabase
-  .from("matches")
-  .select(
-    `
-        *,
-        home_team:teams!home_team_id(name, flag_emoji),
-        away_team:teams!away_team_id(name, flag_emoji)
-    `,
-  )
-  .neq("status", "live")
-  .limit(3);
-
-if (!dailyError && dailyData && dailyData.length > 0) {
-  dailyMatches = dailyData.map((m) => {
-    const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
-    const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+  // Los demás partidos van al carrusel inferior
+  dailyMatches = matchesData.slice(1).map((m) => {
     return {
       homeTeam: {
-        name: home?.name || "TBD",
-        flag: home?.name?.substring(0, 3).toUpperCase() || "❔",
+        name: m.home_team?.name || "TBD",
+        flag: m.home_team?.flag_emoji || "unk.png",
       },
       awayTeam: {
-        name: away?.name || "TBD",
-        flag: away?.name?.substring(0, 3).toUpperCase() || "❔",
+        name: m.away_team?.name || "TBD",
+        flag: m.away_team?.flag_emoji || "unk.png",
       },
       score: { home: m.home_score || 0, away: m.away_score || 0 },
     };
   });
 } else {
+  // Fallback mocks si no hay nada en la DB
+  liveMatchData = {
+    homeTeam: { name: "México", flag: "mex.png" },
+    awayTeam: { name: "Sudáfrica", flag: "rsa.png" },
+    score: { home: 0, away: 0 },
+    status: "PRÓXIMO PARTIDO • 11 JUN • GRUPO A",
+  };
+
   dailyMatches = [
     {
-      homeTeam: { name: "Argentina", flag: "ARG" },
-      awayTeam: { name: "France", flag: "FRA" },
-      score: { home: 3, away: 3 },
-    },
-    {
-      homeTeam: { name: "Argentina", flag: "ARG" },
-      awayTeam: { name: "France", flag: "FRA" },
-      score: { home: 3, away: 3 },
-    },
-    {
-      homeTeam: { name: "Argentina", flag: "ARG" },
-      awayTeam: { name: "France", flag: "FRA" },
-      score: { home: 3, away: 3 },
+      homeTeam: { name: "Corea", flag: "kor.png" },
+      awayTeam: { name: "TBD", flag: "unk.png" },
+      score: { home: 0, away: 0 },
     },
   ];
 }
@@ -113,17 +79,14 @@ if (!dailyError && dailyData && dailyData.length > 0) {
   <!-- Background Stadium Image strictly grayscale/muted -->
   <div class="fixed inset-0 z-0">
     <img
-      src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=2000"
+      src="./bg.webp"
       alt="stadium bg"
-      class="w-full h-full object-cover grayscale opacity-10"
+      class="w-full h-full object-cover opacity-25 object-bottom"
     />
-    <div
-      class="absolute inset-0 bg-gradient-to-b from-[#111111]/80 via-transparent to-[#111111]"
-    >
-    </div>
+    <div class="absolute inset-0 bg-gradient-to-b from-[#111111]/80 via-transparent to-[#111111]"></div>
   </div>
 
-  <div class="relative z-10 flex flex-col min-h-[calc(100vh-80px)]">
+  <div class="relative z-10 flex flex-col min-h-[calc(90vh-80px)]">
     <!-- Central Live Match -->
     <div class="flex-1 flex flex-col justify-center">
       <LiveMatch {...liveMatchData} />
@@ -133,34 +96,9 @@ if (!dailyError && dailyData && dailyData.length > 0) {
     <div class="w-full flex flex-col gap-6">
       <!-- Other Matches Of The Day -->
       <div class="w-full flex flex-col mt-4 lg:mt-12 mb-4">
-        <h4
-          class="text-gold text-[0.6rem] font-bold tracking-[3px] uppercase mb-4"
-        >
-          Other Matches of the day
-        </h4>
-
-        <div
-          class="flex items-center gap-6 overflow-x-auto no-scrollbar pb-6 relative"
-        >
-          <!-- Small right chevron button simulation -->
-          <div
-            class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2"
-          >
-            <div
-              class="w-8 h-8 bg-[#1c1c1e] flex items-center justify-center cursor-pointer hover:bg-[#2c2c2e] transition-colors"
-            >
-              <span class="text-white/40 text-xs">&lt;</span>
-            </div>
-            <div
-              class="w-8 h-8 bg-[#1c1c1e] flex items-center justify-center cursor-pointer hover:bg-[#2c2c2e] transition-colors"
-            >
-              <span class="text-white text-xs">&gt;</span>
-            </div>
-          </div>
-
-          <div class="flex gap-12 lg:gap-24 w-full pr-[100px]">
-            {dailyMatches.map((match) => <CompactMatchCard {...match} />)}
-          </div>
+        <h4 class="text-gold text-[0.6rem] font-bold tracking-[3px] uppercase mb-4" > Partidos del día</h4>
+        <div class="flex items-center gap-6 overflow-x-auto no-scrollbar pb-6 relative">
+          {dailyMatches.map((match) => <CompactMatchCard {...match} />)}
         </div>
       </div>
 
@@ -170,13 +108,3 @@ if (!dailyError && dailyData && dailyData.length > 0) {
   </div>
 </Layout>
 
-<style>
-  /* Quick helper for hiding scrollbar */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-</style>
