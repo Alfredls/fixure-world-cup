@@ -1,0 +1,22 @@
+---
+interface Props {
+  team: { name: string; flag: string };
+  bgClass: string;
+  nameClassName?: string;
+}
+
+const { team, bgClass, nameClassName = "" } = Astro.props;
+---
+
+<div class="flex flex-col items-center">
+  <div class={`w-32 h-32 md:w-56 md:h-56 rounded-full ${bgClass} flex items-center justify-center shadow-2xl relative z-10 overflow-hidden`}>
+    {team.flag.endsWith('.png') ? (
+      <img src={`/flags/${team.flag}`} alt={team.name} class="w-full h-full object-cover" />
+    ) : (
+      <span class="text-6xl md:text-8xl">{team.flag}</span>
+    )}
+  </div>
+  <h2 class={`text-4xl md:text-4xl font-bold text-white uppercase tracking-tight flex-1 flex text-center mt-6 ${nameClassName}`}>
+    {team.name}
+  </h2>
+</div>
