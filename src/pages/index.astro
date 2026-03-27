@@ -10,6 +10,7 @@ import { formatMatchDate, formatMatchTime } from "../lib/dateUtils";
 // 1. Obtener la fecha del próximo partido disponible (hoy o en el futuro)
 const today = new Date().toISOString().split('T')[0];
 const targetDate = await getNextMatchDate(today) || '2026-06-11';
+//const targetDate = '2026-06-15';
 
 // 2. Obtener todos los partidos de esa fecha
 const matchesData = await getMatchesByDate(targetDate);
@@ -52,6 +53,11 @@ if (matchesData && matchesData.length > 0) {
 
   // Los demás partidos van al carrusel inferior
   dailyMatches = matchesData.slice(1).map((m) => {
+    const formattedTime = formatMatchTime(m.match_time);
+    const groupName = m.phase === 'group' 
+      ? `Grupo ${m.group_id}` 
+      : (m.phase?.toUpperCase() || "");
+
     return {
       homeTeam: {
         name: m.home_team?.name || "TBD",
@@ -62,6 +68,8 @@ if (matchesData && matchesData.length > 0) {
         flag: m.away_team?.flag_emoji || "unk.png",
       },
       score: { home: m.home_score || 0, away: m.away_score || 0 },
+      time: formattedTime,
+      group: groupName,
     };
   });
 } else {
@@ -78,6 +86,8 @@ if (matchesData && matchesData.length > 0) {
       homeTeam: { name: "Corea", flag: "kor.png" },
       awayTeam: { name: "TBD", flag: "unk.png" },
       score: { home: 0, away: 0 },
+      time: "14:00",
+      group: "GRUPO B",
     },
   ];
 }
@@ -104,7 +114,7 @@ if (matchesData && matchesData.length > 0) {
     <div class="w-full flex flex-col gap-6">
       <!-- Other Matches Of The Day -->
       <div class="w-full flex flex-col mt-4 lg:mt-12 mb-4">
-        <h4 class="text-gold font-bold tracking-[3px] uppercase mb-8 text-center text-3xl" > Partidos del día</h4>
+        <h4 class="text-gold font-bold tracking-[3px] uppercase mb-8 text-center text-xl  sm:text-3xl" > Partidos del día</h4>
         <div class="flex items-center justify-start md:justify-center gap-6 overflow-x-auto no-scrollbar pb-6 relative px-6 md:px-0 snap-x snap-mandatory">
           {dailyMatches.map((match) => <CompactMatchCard {...match} />)}
         </div>
