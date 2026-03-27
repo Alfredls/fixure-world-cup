@@ -27,7 +27,7 @@ const { homeTeam, awayTeam, score, status, penalties } = Astro.props;
     <TeamDisplay team={homeTeam} bgClass="bg-[#2a5b7c]" />
 
     <!-- Score Area -->
-    <div class="flex flex-col items-center justify-center min-w-[200px]">
+    <div class="flex flex-col items-center justify-center min-w-0 md:min-w-[200px]">
       <div class="flex items-center gap-6 md:gap-10">
         <span class="text-7xl md:text-[8rem] font-bold text-white drop-shadow-md leading-none">{score.home}</span>
         <span class="text-xl md:text-2xl font-bold text-white/30 italic uppercase pt-4">vs</span>

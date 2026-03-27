@@ -105,7 +105,7 @@ if (matchesData && matchesData.length > 0) {
       <!-- Other Matches Of The Day -->
       <div class="w-full flex flex-col mt-4 lg:mt-12 mb-4">
         <h4 class="text-gold font-bold tracking-[3px] uppercase mb-8 text-center text-3xl" > Partidos del día</h4>
-        <div class="flex items-center justify-center gap-6 overflow-x-auto no-scrollbar pb-6 relative">
+        <div class="flex items-center justify-start md:justify-center gap-6 overflow-x-auto no-scrollbar pb-6 relative px-6 md:px-0 snap-x snap-mandatory">
           {dailyMatches.map((match) => <CompactMatchCard {...match} />)}
         </div>
       </div>
