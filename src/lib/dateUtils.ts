@@ -50,3 +50,21 @@ export function formatMatchPhase(phase: string): string {
   
   return capitalized.toUpperCase();
 }
+
+/**
+ * Gets detailed day information for the timeline UI.
+ */
+export function getDayInfo(dateStr: string) {
+    if (!dateStr) return { dayName: '', dayNumber: 0, monthName: '', year: 0 };
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Juv', 'Vie', 'Sáb'];
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    return {
+        dayName: days[date.getDay()],
+        dayNumber: date.getDate(),
+        monthName: months[date.getMonth()],
+        year: date.getFullYear()
+    };
+}
