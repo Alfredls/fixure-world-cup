@@ -31,17 +31,17 @@ const nextColor = getDateColor(index + 1);
 
 <div class="relative z-10 flex flex-col sm:flex-row gap-8 md:gap-16 group">
     <!-- Left: Date & Timeline Segment -->
-    <div class="flex flex-row sm:flex-col items-center sm:items-center min-w-[100px] md:min-w-[120px] relative">
+    <div class="flex flex-row sm:flex-col items-center sm:items-start min-w-[100px] md:min-w-[120px] relative">
         <!-- Segmented Line -->
         {!isLast && (
             <div 
-                class="absolute top-[212px] left-[50px] sm:left-1/2 top-16 bottom-[-96px] w-[2px] z-0 hidden sm:block opacity-30"
+                class="absolute left-[50px] sm:left-1/2 top-24 bottom-[-96px] w-[2px] z-0 hidden sm:block opacity-30"
                 style={`background: linear-gradient(to bottom, ${color}, ${nextColor})`}
             ></div>
         )}
         
         <!-- Date Marker -->
-        <div class="relative z-20 flex flex-row sm:flex-col items-center gap-4 sm:gap-1 py-4 w-full justify-center rounded-2xl border border-white/10 bg-[#0a0a0a]" style={`background-color: ${color}15`} >
+        <div class="sticky top-24 z-20 flex flex-row sm:flex-col items-center gap-4 sm:gap-1 py-4 w-full justify-center rounded-2xl border border-white/10 bg-[#0a0a0a]" style={`background-color: ${color}15`} >
             <span class="text-xs font-black uppercase tracking-[3px] opacity-40 day-label">{info.dayName}</span>
             <span class="text-6xl md:text-7xl font-bebas text-white leading-none tracking-tight">{info.dayNumber}</span>
             <div class="flex flex-col sm:items-center">
