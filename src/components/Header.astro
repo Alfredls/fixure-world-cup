@@ -31,24 +31,21 @@ const dataMenu = [
 ---
 
 <!-- Top Header Navigation -->
-<header  class="w-full h-[80px] z-[100] sticky top-0"
->
-  <nav
-    class="max-w-[1400px] mx-auto h-full flex items-center justify-between px-6 lg:px-12"
-  >
+<header id="main-header" class="w-full h-[80px] z-[100] sticky top-0 transition-all duration-300 border-b border-transparent">
+  <nav class="max-w-[1400px] mx-auto h-full flex items-center justify-between px-6 lg:px-12">
     <!-- Logo -->
-    <a href="/" class="font-bebas text-3xl tracking-widest text-[#ceab52] mt-2">
+    <a href="/" class="font-bebas text-3xl tracking-widest text-gold mt-2 z-50">
       WORLD CUP
     </a>
 
-    <!-- Center Nav -->
+    <!-- Center Nav (Desktop) -->
     <ul class="hidden md:flex items-center gap-10 h-full">
       {
         dataMenu.map((item) => (
           <li class="h-full flex items-center pt-2">
             <a
               href={item.url}
-              class={`text-sm tracking-wide ${item.isActive ? "text-[#ceab52] border-b-2 border-[#ceab52] pb-[8px]" : "text-white/80 hover:text-white transition-colors pb-2 cursor-pointer"}`}
+              class={`text-sm tracking-wide uppercase font-bold ${item.isActive ? "text-gold border-b-2 border-gold pb-[8px]" : "text-white/80 hover:text-white transition-colors pb-2 cursor-pointer"}`}
             >
               {item.name}
             </a>
@@ -57,23 +54,102 @@ const dataMenu = [
       }
     </ul>
 
-    <!-- Right Icon -->
-    <div
-      class="text-white/70 hover:text-white transition-colors cursor-pointer pt-2"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"
-        ></path></svg
-      >
+    <!-- Right Controls -->
+    <div class="flex items-center gap-6 z-50">
+        <!-- Search Icon (Optional) -->
+        <div class="text-white/70 hover:text-white transition-colors cursor-pointer pt-2 hidden sm:block">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        </div>
+
+        <!-- Animated Hamburger Icon (Mobile) -->
+        <button id="menu-toggle" class="md:hidden text-white p-2 focus:outline-none z-50 relative w-10 h-10 flex items-center justify-center pt-2" aria-label="Toggle Menu">
+            <div class="relative w-6 h-5">
+                <span id="line-1" class="absolute top-0 left-0 w-full h-0.5 bg-white transition-all duration-300 transform-gpu"></span>
+                <span id="line-2" class="absolute top-[9px] left-0 w-full h-0.5 bg-white transition-all duration-300"></span>
+                <span id="line-3" class="absolute bottom-0 left-0 w-full h-0.5 bg-white transition-all duration-300 transform-gpu"></span>
+            </div>
+        </button>
     </div>
   </nav>
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobile-menu" class="fixed inset-0 h-[100dvh] bg-[#0a0a0a]/98 backdrop-blur-2xl z-[40] flex flex-col items-center justify-center gap-8 md:hidden transition-all duration-300 opacity-0 pointer-events-none scale-95">
+    {
+      dataMenu.map((item) => (
+        <a
+          href={item.url}
+          class={`text-3xl font-bebas tracking-[4px] uppercase ${item.isActive ? "text-gold" : "text-white/60 hover:text-white transition-colors"}`}
+        >
+          {item.name}
+        </a>
+      ))
+    }
+  </div>
 </header>
+
+<script>
+    const header = document.getElementById('main-header');
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+
+    // Scroll effect (Glassmorphism)
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) {
+            header?.classList.add('bg-black/60', 'backdrop-blur-md', 'border-white/10', 'py-1');
+            header?.classList.remove('h-[80px]');
+            header?.classList.add('h-[70px]');
+        } else {
+            header?.classList.remove('bg-black/60', 'backdrop-blur-md', 'border-white/10', 'py-1');
+            header?.classList.remove('h-[70px]');
+            header?.classList.add('h-[80px]');
+        }
+    });
+
+    const line1 = document.getElementById('line-1');
+    const line2 = document.getElementById('line-2');
+    const line3 = document.getElementById('line-3');
+
+    // Mobile menu toggle
+    menuToggle?.addEventListener('click', () => {
+        const isOpen = mobileMenu?.classList.contains('opacity-100');
+        
+        if (isOpen) {
+            // Close
+            mobileMenu?.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            mobileMenu?.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            
+            line1?.classList.remove('translate-y-[9px]', 'rotate-45');
+            line2?.classList.remove('opacity-0');
+            line3?.classList.remove('-translate-y-[9px]', '-rotate-45');
+            
+            document.body.style.overflow = '';
+        } else {
+            // Open
+            mobileMenu?.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+            mobileMenu?.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            
+            line1?.classList.add('translate-y-[9px]', 'rotate-45');
+            line2?.classList.add('opacity-0');
+            line3?.classList.add('-translate-y-[9px]', '-rotate-45');
+            
+            document.body.style.overflow = 'hidden';
+        }
+    });
+
+    // Close menu on link click
+    const mobileLinks = mobileMenu?.querySelectorAll('a');
+    mobileLinks?.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu?.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+            mobileMenu?.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            
+            line1?.classList.remove('translate-y-[9px]', 'rotate-45');
+            line2?.classList.remove('opacity-0');
+            line3?.classList.remove('-translate-y-[9px]', '-rotate-45');
+            
+            document.body.style.overflow = '';
+        });
+    });
+</script>
