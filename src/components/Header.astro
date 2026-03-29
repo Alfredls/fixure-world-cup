@@ -91,17 +91,15 @@ const dataMenu = [
     const header = document.getElementById('main-header');
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    const hamburgerIcon = document.getElementById('hamburger-icon');
-    const closeIcon = document.getElementById('close-icon');
 
     // Scroll effect (Glassmorphism)
     window.addEventListener('scroll', () => {
         if (window.scrollY > 20) {
-            header?.classList.add('bg-black/60', 'backdrop-blur-md', 'border-white/10', 'py-1');
+            header?.classList.add('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
             header?.classList.remove('h-[80px]');
             header?.classList.add('h-[70px]');
         } else {
-            header?.classList.remove('bg-black/60', 'backdrop-blur-md', 'border-white/10', 'py-1');
+            header?.classList.remove('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
             header?.classList.remove('h-[70px]');
             header?.classList.add('h-[80px]');
         }

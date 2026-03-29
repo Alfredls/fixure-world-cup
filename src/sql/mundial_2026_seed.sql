@@ -124,7 +124,46 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
   (gen_random_uuid(), 'Inglaterra',        'eng.png', 'UEFA',     'L'),
   (gen_random_uuid(), 'Croacia',           'cro.png', 'UEFA',     'L'),
   (gen_random_uuid(), 'Ghana',             'gha.png', 'CAF',      'L'),
-  (gen_random_uuid(), 'Panamá',            'pan.png', 'CONCACAF', 'L');
+  (gen_random_uuid(), 'Panamá',            'pan.png', 'CONCACAF', 'L'),
+
+  -- Equipos de Fase de Eliminación Directa (Knockout)
+  -- Posiciones de grupos
+  (gen_random_uuid(), '1A', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2A', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1B', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2B', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1C', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2C', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1D', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2D', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1E', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2E', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1F', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2F', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1G', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2G', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1H', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2H', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1I', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2I', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1J', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2J', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1K', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2K', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '1L', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '2L', 'unk.png', 'FIFA', NULL),
+  -- Mejores terceros
+  (gen_random_uuid(), '3ABCDF', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '3CDFGH', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '3CEFHI', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '3EHIJK', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '3AEHIJ', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '3BEFIJ', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), '3EFGIJ', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), '3DEIJL', 'unk.png', 'FIFA', NULL),
+  -- Ganadores de partidos (W73, etc)
+  (gen_random_uuid(), 'W73', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W74', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W75', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W76', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W77', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W78', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W79', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W80', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W81', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W82', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W83', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W84', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W85', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W86', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W87', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W88', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W89', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W90', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W91', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W92', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W93', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W94', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W95', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W96', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W97', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W98', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W99', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W100', 'unk.png', 'FIFA', NULL),
+  (gen_random_uuid(), 'W101', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'W102', 'unk.png', 'FIFA', NULL),
+  -- Perdedores Final (RU)
+  (gen_random_uuid(), 'RU101', 'unk.png', 'FIFA', NULL), (gen_random_uuid(), 'RU102', 'unk.png', 'FIFA', NULL);
+
 
 
 -- ============================================================
@@ -582,7 +621,52 @@ VALUES
     (SELECT id FROM t WHERE name='Croacia'),
     (SELECT id FROM t WHERE name='Ghana'),
     '2026-06-27', '17:00',
-    (SELECT id FROM v WHERE name='Lincoln Financial Field'), 'scheduled');
+    (SELECT id FROM v WHERE name='Lincoln Financial Field'), 'scheduled'),
+
+  -- ── DIECISEISAVOS DE FINAL (ROUND OF 32) ──────────────────
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='2A'), (SELECT id FROM t WHERE name='2B'), '2026-06-28', '15:00', (SELECT id FROM v WHERE name='SoFi Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1C'), (SELECT id FROM t WHERE name='2F'), '2026-06-29', '13:00', (SELECT id FROM v WHERE name='NRG Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1E'), (SELECT id FROM t WHERE name='3ABCDF'), '2026-06-29', '16:30', (SELECT id FROM v WHERE name='Gillette Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1F'), (SELECT id FROM t WHERE name='2C'), '2026-06-29', '21:00', (SELECT id FROM v WHERE name='Estadio BBVA'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='2E'), (SELECT id FROM t WHERE name='2I'), '2026-06-30', '13:00', (SELECT id FROM v WHERE name='AT&T Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1I'), (SELECT id FROM t WHERE name='3CDFGH'), '2026-06-30', '17:00', (SELECT id FROM v WHERE name='MetLife Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1A'), (SELECT id FROM t WHERE name='3CEFHI'), '2026-06-30', '21:00', (SELECT id FROM v WHERE name='Estadio Azteca'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1L'), (SELECT id FROM t WHERE name='3EHIJK'), '2026-07-01', '12:00', (SELECT id FROM v WHERE name='Mercedes-Benz Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1G'), (SELECT id FROM t WHERE name='3AEHIJ'), '2026-07-01', '16:00', (SELECT id FROM v WHERE name='Lumen Field'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1D'), (SELECT id FROM t WHERE name='3BEFIJ'), '2026-07-01', '20:00', (SELECT id FROM v WHERE name='Levi''s Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1H'), (SELECT id FROM t WHERE name='2J'), '2026-07-02', '15:00', (SELECT id FROM v WHERE name='SoFi Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='2K'), (SELECT id FROM t WHERE name='2L'), '2026-07-02', '19:00', (SELECT id FROM v WHERE name='NRG Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1B'), (SELECT id FROM t WHERE name='3EFGIJ'), '2026-07-02', '23:00', (SELECT id FROM v WHERE name='BC Place'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='2D'), (SELECT id FROM t WHERE name='2G'), '2026-07-03', '14:00', (SELECT id FROM v WHERE name='AT&T Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1J'), (SELECT id FROM t WHERE name='2H'), '2026-07-03', '18:00', (SELECT id FROM v WHERE name='Hard Rock Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Dieciseisavos de Final', (SELECT id FROM t WHERE name='1K'), (SELECT id FROM t WHERE name='3DEIJL'), '2026-07-03', '21:30', (SELECT id FROM v WHERE name='Arrowhead Stadium'), 'scheduled'),
+
+  -- ── OCTAVOS DE FINAL (ROUND OF 16) ────────────────────────
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W73'), (SELECT id FROM t WHERE name='W75'), '2026-07-04', '13:00', (SELECT id FROM v WHERE name='NRG Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W74'), (SELECT id FROM t WHERE name='W77'), '2026-07-04', '17:00', (SELECT id FROM v WHERE name='Lincoln Financial Field'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W76'), (SELECT id FROM t WHERE name='W78'), '2026-07-05', '16:00', (SELECT id FROM v WHERE name='MetLife Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W79'), (SELECT id FROM t WHERE name='W80'), '2026-07-05', '20:00', (SELECT id FROM v WHERE name='Estadio Azteca'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W83'), (SELECT id FROM t WHERE name='W84'), '2026-07-06', '15:00', (SELECT id FROM v WHERE name='AT&T Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W81'), (SELECT id FROM t WHERE name='W82'), '2026-07-06', '20:00', (SELECT id FROM v WHERE name='Lumen Field'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W86'), (SELECT id FROM t WHERE name='W88'), '2026-07-07', '12:00', (SELECT id FROM v WHERE name='Mercedes-Benz Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Octavos de Final', (SELECT id FROM t WHERE name='W85'), (SELECT id FROM t WHERE name='W87'), '2026-07-07', '16:00', (SELECT id FROM v WHERE name='BC Place'), 'scheduled'),
+
+  -- ── CUARTOS DE FINAL (QUARTER-FINALS) ─────────────────────
+  (gen_random_uuid(), NULL, 'Cuartos de Final', (SELECT id FROM t WHERE name='W89'), (SELECT id FROM t WHERE name='W90'), '2026-07-09', '16:00', (SELECT id FROM v WHERE name='Gillette Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Cuartos de Final', (SELECT id FROM t WHERE name='W93'), (SELECT id FROM t WHERE name='W94'), '2026-07-10', '15:00', (SELECT id FROM v WHERE name='SoFi Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Cuartos de Final', (SELECT id FROM t WHERE name='W91'), (SELECT id FROM t WHERE name='W92'), '2026-07-11', '17:00', (SELECT id FROM v WHERE name='Hard Rock Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Cuartos de Final', (SELECT id FROM t WHERE name='W95'), (SELECT id FROM t WHERE name='W96'), '2026-07-11', '21:00', (SELECT id FROM v WHERE name='Arrowhead Stadium'), 'scheduled'),
+
+  -- ── SEMIFINALES ───────────────────────────────────────────
+  (gen_random_uuid(), NULL, 'Semifinales', (SELECT id FROM t WHERE name='W97'), (SELECT id FROM t WHERE name='W98'), '2026-07-14', '15:00', (SELECT id FROM v WHERE name='AT&T Stadium'), 'scheduled'),
+  (gen_random_uuid(), NULL, 'Semifinales', (SELECT id FROM t WHERE name='W99'), (SELECT id FROM t WHERE name='W100'), '2026-07-15', '15:00', (SELECT id FROM v WHERE name='Mercedes-Benz Stadium'), 'scheduled'),
+
+  -- ── TERCER PUESTO ─────────────────────────────────────────
+  (gen_random_uuid(), NULL, 'Tercer Puesto', (SELECT id FROM t WHERE name='RU101'), (SELECT id FROM t WHERE name='RU102'), '2026-07-18', '17:00', (SELECT id FROM v WHERE name='Hard Rock Stadium'), 'scheduled'),
+
+  -- ── FINAL ─────────────────────────────────────────────────
+  (gen_random_uuid(), NULL, 'Final', (SELECT id FROM t WHERE name='W101'), (SELECT id FROM t WHERE name='W102'), '2026-07-19', '15:00', (SELECT id FROM v WHERE name='MetLife Stadium'), 'scheduled');
+
 
 
 -- ============================================================
@@ -594,4 +678,5 @@ SELECT
   group_id,
   id,
   0, 0, 0, 0, 0, 0, 0, 0, false
-FROM teams;
+FROM teams
+WHERE group_id IS NOT NULL;
