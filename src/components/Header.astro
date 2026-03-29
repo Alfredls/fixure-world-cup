@@ -2,9 +2,9 @@
 const pathname = new URL(Astro.request.url).pathname;
 const isHome = pathname === "/" || pathname === "/index.html";
 const isGroups =
-  pathname.startsWith("/grupos") || pathname.startsWith("/grupo/");
-const isHistorial =
-  pathname.startsWith("/historial") || pathname.startsWith("/bracket");
+  pathname.startsWith("/groups") || pathname.startsWith("/group/");
+const isHistory =
+  pathname.startsWith("/history") || pathname.startsWith("/bracket");
 
 const dataMenu = [
   {
@@ -19,13 +19,13 @@ const dataMenu = [
   },
   {
     name: "Grupos",
-    url: "/grupos",
+    url: "/groups",
     isActive: isGroups,
   },
   {
     name: "Historial",
-    url: "/historial",
-    isActive: isHistorial,
+    url: "/history",
+    isActive: isHistory,
   },
 ];
 ---

@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 const { id } = Astro.params;
 
 // 1. Obtener datos del grupo de Supabase
-let groupName = `GRUPO ${id}`;
+let groupName = `GROUP ${id}`;
 let standings: any[] = [];
 let matches: any[] = [];
 
@@ -76,20 +76,20 @@ if (matches.length === 0) {
 ---
 
 <Layout title={groupName}>
-	<a href="/grupos" class="no-underline text-muted font-semibold text-sm inline-block mb-8 transition-colors duration-300 hover:text-gold">← Volver a Grupos</a>
+	<a href="/groups" class="no-underline text-muted font-semibold text-sm inline-block mb-8 transition-colors duration-300 hover:text-gold">← Back to Groups</a>
 	
 	<header class="mb-16">
 		<h1 class="text-5xl md:text-7xl text-gold font-bebas mb-[-10px]">{groupName}</h1>
-		<p class="text-muted text-xl">Posiciones y próximos encuentros del grupo {id}.</p>
+		<p class="text-muted text-xl">Standings and upcoming matches for group {id}.</p>
 	</header>
 
 	<section class="mb-16">
-		<h2 class="text-3xl font-bebas mb-6 border-l-4 border-green-accent pl-4">TABLA DE POSICIONES</h2>
+		<h2 class="text-3xl font-bebas mb-6 border-l-4 border-green-accent pl-4">STANDINGS</h2>
 		<StandingsTable standings={standings} />
 	</section>
 
 	<section class="mb-16">
-		<h2 class="text-3xl font-bebas mb-6 border-l-4 border-green-accent pl-4">PARTIDOS DEL GRUPO</h2>
+		<h2 class="text-3xl font-bebas mb-6 border-l-4 border-green-accent pl-4">GROUP MATCHES</h2>
 		<div class="flex flex-col gap-6">
 			{matches.map(match => (
 				<MatchCard {...match} />
