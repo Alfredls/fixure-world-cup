@@ -37,21 +37,23 @@ const { standings } = Astro.props;
 		<tbody>
 			{standings.map((row, index) => (
 				<tr class={`border-b border-white/5 last:border-b-0 ${index < 2 ? 'bg-gradient-to-r from-green-accent/5 to-transparent' : ''}`}>
-					<td class={`p-4 ${index < 2 ? 'border-l-4 border-green-accent' : ''}`}>{index + 1}</td>
+					<td class={`text-center font-bold text-gold p-4 ${index < 2 ? 'border-l-4 border-green-accent' : ''}`}>{index + 1}</td>
 					<td class="p-4 text-left">
 						<div class="flex items-center gap-3 font-semibold">
-							<span class="text-lg">{row.team.flag}</span>
+							<div class="w-8 h-8 rounded-full border border-white/10 overflow-hidden shadow-sm bg-white/5 p-0.5">
+								<img src={`/flags/${row.team.flag}`} alt="" class="w-full h-full object-cover rounded-full" />
+							</div>
 							<span>{row.team.name}</span>
 						</div>
 					</td>
-					<td class="p-4">{row.played}</td>
-					<td class="p-4">{row.won}</td>
-					<td class="p-4">{row.drawn}</td>
-					<td class="p-4">{row.lost}</td>
-					<td class="p-4 hidden sm:table-cell">{row.gf}</td>
-					<td class="p-4 hidden sm:table-cell">{row.ga}</td>
-					<td class="p-4 hidden sm:table-cell">{row.gd}</td>
-					<td class="p-4 font-black text-gold">{row.pts}</td>
+					<td class="text-center p-4">{row.played}</td>
+					<td class="text-center p-4">{row.won}</td>
+					<td class="text-center p-4">{row.drawn}</td>
+					<td class="text-center p-4">{row.lost}</td>
+					<td class="text-center p-4 hidden sm:table-cell">{row.gf}</td>
+					<td class="text-center p-4 hidden sm:table-cell">{row.ga}</td>
+					<td class="text-center p-4 hidden sm:table-cell">{row.gd}</td>
+					<td class="text-center p-4 font-black text-gold">{row.pts}</td>
 				</tr>
 			))}
 		</tbody>

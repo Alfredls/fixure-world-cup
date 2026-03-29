@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import GroupCard from '../components/GroupCard.astro';
+import BackgroundBlobs from '../components/BackgroundBlobs.astro';
 import { supabase } from '../lib/supabase';
 
 // Intentar obtener datos de Supabase
@@ -20,20 +21,35 @@ if (!error && groupsData && groupsData.length > 0) {
 		{ id: 'C', name: 'Group C', teams: [{id: '9', name: 'Brazil', flag_emoji: '🇧🇷'}, {id: '10', name: 'Morocco', flag_emoji: '🇲🇦'}, {id: '11', name: 'Scotland', flag_emoji: '🏴󠁧󠁢󠁳󠁣󠁴󠁿'}, {id: '12', name: 'Haiti', flag_emoji: '🇭🇹'}] },
 		{ id: 'D', name: 'Group D', teams: [{id: '13', name: 'USA', flag_emoji: '🇺🇸'}, {id: '14', name: 'Australia', flag_emoji: '🇦🇺'}, {id: '15', name: 'Paraguay', flag_emoji: '🇵🇾'}, {id: '16', name: 'PO Winner', flag_emoji: '❔'}] },
         { id: 'E', name: 'Group E', teams: [{id: '17', name: 'Argentina', flag_emoji: '🇦🇷'}, {id: '18', name: 'Belgium', flag_emoji: '🇧🇪'}, {id: '19', name: 'Iran', flag_emoji: '🇮🇷'}, {id: '20', name: 'PO Winner', flag_emoji: '❔'}] },
+		{ id: 'F', name: 'Group F', teams: [{id: '21', name: 'Germany', flag_emoji: '🇩🇪'}, {id: '22', name: 'Japan', flag_emoji: '🇯🇵'}, {id: '23', name: 'Spain', flag_emoji: '🇪🇸'}, {id: '24', name: 'PO Winner', flag_emoji: '❔'}] },
+		{ id: 'G', name: 'Group G', teams: [{id: '25', name: 'France', flag_emoji: '🇫🇷'}, {id: '26', name: 'England', flag_emoji: '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}, {id: '27', name: 'Italy', flag_emoji: '🇮🇹'}, {id: '28', name: 'PO Winner', flag_emoji: '❔'}] },
+		{ id: 'H', name: 'Group H', teams: [{id: '29', name: 'Portugal', flag_emoji: '🇵🇹'}, {id: '30', name: 'Uruguay', flag_emoji: '🇺🇾'}, {id: '31', name: 'Ghana', flag_emoji: '🇬🇭'}, {id: '32', name: 'PO Winner', flag_emoji: '❔'}] },
+		{ id: 'I', name: 'Group I', teams: [{id: '33', name: 'Netherlands', flag_emoji: '🇳🇱'}, {id: '34', name: 'Ecuador', flag_emoji: '🇪🇨'}, {id: '35', name: 'Senegal', flag_emoji: '🇸🇳'}, {id: '36', name: 'PO Winner', flag_emoji: '❔'}] },
+		{ id: 'J', name: 'Group J', teams: [{id: '37', name: 'Denmark', flag_emoji: '🇩🇰'}, {id: '38', name: 'Tunisia', flag_emoji: '🇹🇳'}, {id: '39', name: 'Poland', flag_emoji: '🇵🇱'}, {id: '40', name: 'PO Winner', flag_emoji: '❔'}] },
+		{ id: 'K', name: 'Group K', teams: [{id: '41', name: 'Croatia', flag_emoji: '🇭🇷'}, {id: '42', name: 'Morocco', flag_emoji: '🇲🇦'}, {id: '43', name: 'Canada', flag_emoji: '🇨🇦'}, {id: '44', name: 'PO Winner', flag_emoji: '❔'}] },
+		{ id: 'L', name: 'Group L', teams: [{id: '45', name: 'Belgium', flag_emoji: '🇧🇪'}, {id: '46', name: 'Serbia', flag_emoji: '🇷🇸'}, {id: '47', name: 'Cameroon', flag_emoji: '🇨🇲'}, {id: '48', name: 'PO Winner', flag_emoji: '❔'}] },
 	];
 }
 ---
 
 <Layout title="Groups">
-	<header class="text-center mb-12">
-		<h1 class="text-4xl md:text-6xl mb-2 font-bebas">WORLD CUP GROUPS</h1>
-		<p class="text-muted text-lg">The 48 teams divided into 12 groups of 4.</p>
-	</header>
+	<div class="relative min-h-screen">
+		<BackgroundBlobs />
 
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-		{groups.map((group) => (
-			<GroupCard id={group.id} name={group.name} teams={group.teams} />
-		))}
+		<div class="relative z-10 max-w-[1400px] mx-auto px-0 md:px-2 py-16 md:py-24">
+			<header class="text-center mb-20">
+				<div class="flex items-center justify-center gap-3 mb-6">
+					<div class="w-12 h-1.5 bg-gold rounded-full"></div>
+					<h2 class="text-gold font-bold tracking-[6px] uppercase text-[0.7rem] md:text-sm">Fase de Grupos</h2>
+				</div>
+			</header>
+
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+				{groups.map((group) => (
+					<GroupCard id={group.id} name={group.name} teams={group.teams} />
+				))}
+			</div>
+		</div>
 	</div>
 </Layout>
 
