@@ -1,98 +1,458 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import BackgroundBlobs from '../components/BackgroundBlobs.astro';
+import KnockoutMatch from '../components/KnockoutMatch.astro';
+import { supabase } from '../lib/supabase';
+import { formatMatchTime } from '../lib/dateUtils';
+
+// 1. Obtener datos reales de la base de datos
+const { data: rawMatches, error } = await supabase
+  .from('matches')
+  .select(`
+    id,
+    phase,
+    match_date,
+    match_time,
+    status,
+    home_team:teams!home_team_id(name, flag_emoji),
+    away_team:teams!away_team_id(name, flag_emoji),
+    venue:venues(name, city)
+  `)
+  .neq('phase', 'group')
+  .order('match_date', { ascending: true })
+  .order('match_time', { ascending: true });
+
+// 2. Procesar y agrupar por fase
+const phaseMapping: Record<string, string> = {
+  "Dieciseisavos de Final": "Dieciseisavos",
+  "Octavos de Final": "Octavos",
+  "Cuartos de Final": "Cuartos",
+  "Semifinales": "Semifinal",
+  "Final": "Final"
+};
+
+// Helper capacities for symmetrical brackets
+const phaseCapacities: Record<string, number> = {
+  "Dieciseisavos de Final": 8, // 8 por lado = 16 total
+  "Octavos de Final": 4,       // 4 por lado = 8 total
+  "Cuartos de Final": 2,       // 2 por lado = 4 total
+  "Semifinales": 1             // 1 por lado = 2 total
+};
+
+const createEmptyMatch = (phaseName: string) => ({
+    id: `empty-${Math.random()}`,
+    phase: phaseName,
+    homeTeam: { name: 'Por definir', flag: 'unk.png' },
+    awayTeam: { name: 'Por definir', flag: 'unk.png' },
+    date: 'TBD',
+    time: '--:--',
+    stadium: 'TBD',
+    city: '',
+    status: 'scheduled'
+});
+
+// Helper para agrupar en pares con Relleno (Padding) para mantener estructura
+const chunkIntoPairs = (arr: any[], capacity: number, phaseName: string) => {
+  const paddedArr = [...arr];
+  while (paddedArr.length < capacity) {
+      paddedArr.push(createEmptyMatch(phaseName));
+  }
+
+  const pairs = [];
+  if (capacity === 1) {
+      pairs.push([paddedArr[0]]);
+  } else {
+      for (let i = 0; i < paddedArr.length; i += 2) {
+        pairs.push([paddedArr[i], paddedArr[i + 1]]);
+      }
+  }
+  return pairs;
+};
+
+
+const matches = (rawMatches || []).map(m => {
+  const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
+  const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+  const venueInfo = Array.isArray(m.venue) ? m.venue[0] : m.venue;
+
+  return {
+    id: m.id,
+    phase: m.phase,
+    homeTeam: { name: home?.name || 'TBD', flag: home?.flag_emoji || 'unk.png' },
+    awayTeam: { name: away?.name || 'TBD', flag: away?.flag_emoji || 'unk.png' },
+    date: m.match_date,
+    time: formatMatchTime(m.match_time),
+    stadium: venueInfo?.name || 'TBD',
+    city: venueInfo?.city || '',
+    status: m.status
+  };
+});
+
+const phasesLeftAll = ["Dieciseisavos de Final", "Octavos de Final", "Cuartos de Final", "Semifinales"];
+// Para la derecha, el orden visual en la pantalla es desde las semis al centro hacia afuera (1/16 a la derecha invertido)
+const phasesRightAll = ["Semifinales", "Cuartos de Final", "Octavos de Final", "Dieciseisavos de Final"];
+
+// Verificamos si en verdad hay partidos de "Dieciseisavos" en la base de datos para mostrarlos.
+// Si no hay ninguno, acortamos la llave dinámicamente para que inicie en "Octavos" como MARCA.
+const hasDieciseisavos = matches.some(m => m.phase === "Dieciseisavos de Final");
+
+const phasesLeft = hasDieciseisavos ? phasesLeftAll : phasesLeftAll.filter(p => p !== "Dieciseisavos de Final");
+const phasesRight = hasDieciseisavos ? phasesRightAll : phasesRightAll.filter(p => p !== "Dieciseisavos de Final");
+
+// Repartir partidos estructuralmente
+const getHalfPhase = (phaseName: string, side: 'left' | 'right') => {
+    const rawPhaseMatches = matches.filter(m => m.phase === phaseName);
+    const capacity = phaseCapacities[phaseName] || 0;
+    
+    // Primero llenamos la izquierda hasta su capacidad máxima
+    const leftMatches = rawPhaseMatches.slice(0, capacity);
+    // Luego lo sobrante va a la derecha
+    const rightMatches = rawPhaseMatches.slice(capacity, capacity * 2);
+    
+    const splitMatches = side === 'left' ? leftMatches : rightMatches;
+    
+    return {
+        name: phaseMapping[phaseName] || phaseName,
+        matches: splitMatches,
+        pairs: chunkIntoPairs(splitMatches, capacity, phaseName)
+    };
+};
+
+// Generar los bloques dinámicamente forzando que devuelva todo (incluso vacíos para la estructura)
+const leftBracket = phasesLeft.map(p => getHalfPhase(p, 'left'));
+const rightBracket = phasesRight.map(p => getHalfPhase(p, 'right'));
+const finalMatchRaw = matches.filter(m => m.phase === "Final");
+
+// Final central
+const finalRound = finalMatchRaw.length > 0 ? { name: "Final", matches: finalMatchRaw, pairs: [] } : {
+  name: "Final",
+  matches: [createEmptyMatch("Final")],
+  pairs: []
+};
+
 ---
 
-<Layout title="History">
-	<header class="text-center mb-12">
-		<h1 class="text-4xl md:text-6xl mb-2 font-bebas text-white">TOURNAMENT HISTORY</h1>
-		<p class="text-muted text-lg">Previous results and the path to glory.</p>
-	</header>
+<Layout title="Historial | Fase Final" fullWidth={true}>
+    <div class="relative h-[calc(100vh-80px)] w-full overflow-hidden bg-[#05060a] select-none">
+        <BackgroundBlobs />
+        
+        <div id="bracket-viewer" class="absolute inset-0 z-10 cursor-grab active:cursor-grabbing overflow-hidden touch-none">
+            <div id="zoom-content" class="inline-block p-6 md:p-14 origin-top-left will-change-transform transform-gpu">
+                <div class="flex gap-16 md:gap-32 min-w-max h-full">
+                    {/* --- ALA IZQUIERDA --- */}
+                    {leftBracket.map((round, roundIdx) => (
+                        <div class="flex flex-col gap-8 md:gap-12 w-[220px] md:w-[260px] shrink-0 stretch self-stretch">
+                            <!-- Round Header -->
+                            <div class="bg-white/[0.04] border border-white/10 backdrop-blur-3xl px-6 py-4 md:px-10 md:py-6 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group hover:border-gold/40 transition-all duration-700 h-[80px] md:h-[100px] flex items-center justify-center">
+                                <h2 class="text-white font-bebas text-2xl md:text-3xl tracking-[4px] text-center group-hover:text-gold transition-colors block">{round.name.toUpperCase()}</h2>
+                            </div>
+                            <!-- Matches Group -->
+                            {/* flex-1 instead of h-full strictly enforces equal pixel heights minus the header! */}
+                            <div class="flex flex-col flex-1 py-4 md:py-8 relative">
+                                {round.pairs.map((pair) => (
+                                    <div class="relative flex flex-col flex-1">
+                                        {pair.map((match, idx) => (
+                                            <div class="relative flex-1 flex flex-col justify-center px-0 py-1">
+                                                <div class="relative w-full z-10">
+                                                    <div class="hover:scale-[1.05] hover:z-20 transition-all duration-500 will-change-transform cursor-pointer relative z-10 w-full">
+                                                        <KnockoutMatch match={match} />
+                                                    </div>
+                                                </div>
 
-	<div class="w-full overflow-x-auto bg-[#1c1c1e]/50 rounded-3xl p-8 border border-white/5">
-		<div class="flex min-w-[1400px] gap-8">
-			<!-- Ronda de 32 -->
-			<div class="flex-1 flex flex-col gap-8">
-				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">ROUND OF 32</div>
-				<div class="flex flex-col justify-around h-full gap-6">
-					{[...Array(16)].map((_, i) => (
-						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px]">
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0 text-[#ceab52] bg-[#ceab52]/10">
-								<span class="opacity-60">1A</span> 🏆
-							</div>
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
-								<span class="opacity-60">2B</span>
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
+                                                {/* Entry Line (flows IN towards center, meaning it comes from Left. Draw only if NOT the very first visually leftmost column) */}
+                                                {roundIdx > 0 && (
+                                                    <div class="absolute right-full top-1/2 -translate-y-1/2 w-[32px] md:w-[64px] h-[2px] bg-gradient-to-r from-transparent via-gold to-white/10 -z-10"></div>
+                                                )}
 
-			<!-- Octavos -->
-			<div class="flex-1 flex flex-col gap-8">
-				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">ROUND OF 16</div>
-				<div class="flex flex-col justify-around h-full gap-6">
-					{[...Array(8)].map((_, i) => (
-						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px] h-[100px] flex flex-col justify-center">
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
-								<span class="opacity-60">W33</span>
-							</div>
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
-								<span class="opacity-60">W34</span>
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
+                                                {/* EXIT LINES */}
+                                                {pair.length === 2 && (
+                                                    <div class="absolute left-full top-1/2 -translate-y-1/2 w-[32px] md:w-[64px] h-[2px] bg-gold shadow-[0_0_5px_rgba(255,255,255,0.1)] -z-10"></div>
+                                                )}
+                                                {pair.length === 2 && idx === 0 && (
+                                                    <div class="absolute left-[calc(100%+32px)] md:left-[calc(100%+64px)] top-1/2 bottom-0 w-[2px] bg-gold shadow-[0_0_20px_rgba(206,171,82,0.3)] -z-10"></div>
+                                                )}
+                                                {pair.length === 2 && idx === 1 && (
+                                                    <div class="absolute left-[calc(100%+32px)] md:left-[calc(100%+64px)] top-0 bottom-1/2 w-[2px] bg-gold shadow-[0_0_20px_rgba(206,171,82,0.3)] -z-10"></div>
+                                                )}
+                                            </div>
+                                        ))}
 
-			<!-- Cuartos -->
-			<div class="flex-1 flex flex-col gap-8">
-				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">QUARTER-FINALS</div>
-				<div class="flex flex-col justify-around h-full gap-6">
-					{[...Array(4)].map((_, i) => (
-						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px] h-[220px] flex flex-col justify-center">
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
-								<span class="opacity-60">W49</span>
-							</div>
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
-								<span class="opacity-60">W50</span>
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
+                                        {/* JUNCTION DOT AND FORWARD LINE */}
+                                        {pair.length === 2 ? (
+                                            <div class="absolute left-[calc(100%+32px)] md:left-[calc(100%+64px)] top-1/2 -translate-y-1/2 z-0 pointer-events-none">
+                                                <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-gold rounded-full border border-white/20 shadow-[0_0_15px_rgba(206,171,82,0.9)] z-30"></div>
+                                                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-[32px] md:w-[64px] h-[2px] bg-gold shadow-[0_0_12px_rgba(206,171,82,0.6)]"></div>
+                                            </div>
+                                        ) : (
+                                            <div class="absolute left-full top-1/2 -translate-y-1/2 flex items-center z-0 pointer-events-none w-full max-w-[0px]">
+                                                {/* Single straight line to the Final */}
+                                                <div class="absolute left-0 w-[64px] md:w-[128px] top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-gold to-gold shadow-[0_0_15px_rgba(206,171,82,0.4)]"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
 
-			<!-- Semis -->
-			<div class="flex-1 flex flex-col gap-8">
-				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">SEMI-FINALS</div>
-				<div class="flex flex-col justify-around h-full gap-6">
-					{[...Array(2)].map((_, i) => (
-						<div class="bg-[#1c1c1e] border border-white/10 rounded-md overflow-hidden w-[180px] h-[460px] flex flex-col justify-center">
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
-								<span class="opacity-60">W57</span>
-							</div>
-							<div class="px-4 py-2 text-[0.85rem] font-bold flex justify-between border-b border-white/5 last:border-b-0">
-								<span class="opacity-60">W58</span>
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
+                    {/* --- CORE: FINAL --- */}
+                    <div class="flex flex-col gap-12 md:gap-20 w-[240px] md:w-[300px] h-full shrink-0">
+                        {/* Final Header */}
+                        <div class="bg-gradient-to-b from-gold/20 to-transparent border border-gold/40 backdrop-blur-3xl px-6 py-6 md:px-10 md:py-8 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(206,171,82,0.2)] group hover:border-gold/60 transition-all duration-700">
+                            <h2 class="text-white font-bebas text-3xl md:text-5xl tracking-[6px] text-center drop-shadow-[0_0_15px_rgba(206,171,82,0.5)]">FINAL</h2>
+                        </div>
 
-			<!-- Final -->
-			<div class="flex-1 flex flex-col gap-8">
-				<div class="font-bebas text-xl text-center text-gold tracking-widest mb-8 bg-[#111] p-2 rounded-lg">FINAL</div>
-				<div class="flex flex-col justify-around h-full gap-6">
-					<div class="bg-[#1c1c1e] border-2 border-gold rounded-md overflow-hidden w-[180px] h-[200px] flex flex-col justify-center bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.1)_0%,transparent_80%)]">
-						<div class="text-5xl text-center mb-4">🏆</div>
-						<div class="px-4 py-2 font-bold flex justify-between border-b border-white/5 last:border-b-0 text-gold text-base p-4">
-							<span class="opacity-60">W61</span>
-						</div>
-						<div class="px-4 py-2 font-bold flex justify-between border-b border-white/5 last:border-b-0 text-gold text-base p-4">
-							<span class="opacity-60">W62</span>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                        {/* Final Match Group */}
+                        <div class="flex flex-col flex-1 justify-center items-center relative py-4 md:py-8 translate-y-[230%]">
+                            
+                            {/* Graphic Cup Placeholder (Absolute positioned to not break horizontal alignment) */}
+                            <div class="absolute bottom-[calc(50%+40px)] md:bottom-[calc(50%+60px)] left-1/2 -translate-x-1/2 pointer-events-none">
+                                <div class="w-32 h-40 md:w-48 md:h-60 bg-gradient-to-b from-white/10 to-transparent opacity-50 rounded-b-full shadow-[0_0_60px_rgba(255,255,255,0.1)] flex items-center justify-center border-t-2 border-gold/40 shrink-0">
+                                   <!-- Cup SVG could go here -->
+                                   <div class="text-gold/20 text-6xl">🏆</div>
+                                </div>
+                            </div>
+                            
+                            {/* Final Match Card */}
+                            <div class="relative z-10 w-full hover:scale-[1.05] hover:z-20 transition-all duration-500 will-change-transform cursor-pointer shadow-[0_0_40px_rgba(206,171,82,0.2)] rounded-2xl">
+                                <KnockoutMatch match={finalRound.matches[0]} />
+                            </div>
+
+                            
+                        </div>
+                    </div>
+
+                    {/* --- ALA DERECHA --- */}
+                    {rightBracket.map((round, roundIdx) => (
+                        <div class="flex flex-col gap-8 md:gap-12 w-[220px] md:w-[260px] shrink-0 stretch self-stretch">
+                            <!-- Round Header -->
+                            <div class="bg-white/[0.04] border border-white/10 backdrop-blur-3xl px-6 py-4 md:px-10 md:py-6 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group hover:border-gold/40 transition-all duration-700 h-[80px] md:h-[100px] flex items-center justify-center">
+                                <h2 class="text-white font-bebas text-2xl md:text-3xl tracking-[4px] text-center group-hover:text-gold transition-colors block">{round.name.toUpperCase()}</h2>
+                            </div>
+                            <!-- Matches Group -->
+                            {/* flex-1 strictly enforces equal pixel heights minus the header! */}
+                            <div class="flex flex-col flex-1 py-4 md:py-8 relative">
+                                {round.pairs.map((pair) => (
+                                    <div class="relative flex flex-col flex-1">
+                                        {pair.map((match, idx) => (
+                                            <div class="relative flex-1 flex flex-col justify-center px-0 py-1">
+                                                <div class="relative w-full z-10">
+                                                    <div class="hover:scale-[1.05] hover:z-20 transition-all duration-500 will-change-transform cursor-pointer relative z-10 w-full">
+                                                        <KnockoutMatch match={match} />
+                                                    </div>
+                                                </div>
+
+                                                {/* Entry Line (flows IN FROM right towards center. Draw only if NOT the very rightmost column visually) */}
+                                                {roundIdx < rightBracket.length - 1 && (
+                                                    <div class="absolute left-full top-1/2 -translate-y-1/2 w-[32px] md:w-[64px] h-[2px] bg-gradient-to-l from-transparent via-gold to-gold -z-10"></div>
+                                                )}
+
+                                                {/* EXIT LINES */}
+                                                {pair.length === 2 && (
+                                                    <div class="absolute right-full top-1/2 -translate-y-1/2 w-[32px] md:w-[64px] h-[2px] bg-gold shadow-[0_0_5px_rgba(255,255,255,0.1)] -z-10"></div>
+                                                )}
+                                                {pair.length === 2 && idx === 0 && (
+                                                    <div class="absolute right-[calc(100%+32px)] md:right-[calc(100%+64px)] top-1/2 bottom-0 w-[2px] bg-gold shadow-[0_0_20px_rgba(206,171,82,0.3)] -z-10"></div>
+                                                )}
+                                                {pair.length === 2 && idx === 1 && (
+                                                    <div class="absolute right-[calc(100%+32px)] md:right-[calc(100%+64px)] top-0 bottom-1/2 w-[2px] bg-gold shadow-[0_0_20px_rgba(206,171,82,0.3)] -z-10"></div>
+                                                )}
+                                            </div>
+                                        ))}
+
+                                        {/* JUNCTION DOT AND FORWARD LINE */}
+                                        {pair.length === 2 ? (
+                                            <div class="absolute right-[calc(100%+32px)] md:right-[calc(100%+64px)] top-1/2 -translate-y-1/2 z-0 pointer-events-none">
+                                                <div class="absolute right-1/2 top-1/2 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-gold rounded-full border border-white/20 shadow-[0_0_15px_rgba(206,171,82,0.9)] z-30"></div>
+                                                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-[32px] md:w-[64px] h-[2px] bg-gold/80 shadow-[0_0_12px_rgba(206,171,82,0.6)]"></div>
+                                            </div>
+                                        ) : (
+                                            <div class="absolute right-full top-1/2 -translate-y-1/2 flex items-center z-0 pointer-events-none w-full max-w-[0px]">
+                                                {/* Single straight line to the Final */}
+                                                <div class="absolute right-0 w-[64px] md:w-[128px] top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-l from-gold/40 to-gold shadow-[0_0_15px_rgba(206,171,82,0.4)]"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        <!-- ZOOM CONTROLS -->
+        <div class="fixed bottom-6 right-6 md:bottom-12 md:right-12 z-30 flex flex-col gap-2 md:gap-4 bg-[#0a0a0a]/90 backdrop-blur-2xl p-3 md:p-5 rounded-[2rem] md:rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] md:shadow-[0_0_100px_rgba(0,0,0,0.9)]">
+            <button id="zoom-in" class="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-gold/10 hover:bg-gold/20 text-gold rounded-full border border-gold/30 transition-all active:scale-90 shadow-2xl pointer-events-auto" title="Aumentar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 md:w-8 md:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button id="zoom-out" class="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-white/5 hover:bg-white/10 text-white rounded-full border border-white/10 transition-all active:scale-90 shadow-2xl pointer-events-auto" title="Reducir">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 md:w-8 md:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <div class="h-[1px] w-full bg-white/10 my-0.5 md:my-1 px-2 md:px-4 opacity-30"></div>
+            <button id="zoom-reset" class="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/50 rounded-full border border-white/10 transition-all active:scale-90 shadow-2xl pointer-events-auto" title="Reset View">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 md:w-[26px] md:h-[26px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+        </div>
+    </div>
 </Layout>
+
+<script>
+class InteractionViewer {
+    viewer: HTMLElement | null;
+    content: HTMLElement | null;
+    zoomInBtn: HTMLElement | null;
+    zoomOutBtn: HTMLElement | null;
+    zoomResetBtn: HTMLElement | null;
+    state: {
+        scale: number;
+        x: number;
+        y: number;
+        isDragging: boolean;
+        startX: number;
+        startY: number;
+    };
+
+    constructor() {
+        this.viewer = document.getElementById('bracket-viewer');
+        this.content = document.getElementById('zoom-content');
+        this.zoomInBtn = document.getElementById('zoom-in');
+        this.zoomOutBtn = document.getElementById('zoom-out');
+        this.zoomResetBtn = document.getElementById('zoom-reset');
+        
+        this.state = {
+            scale: window.innerWidth < 768 ? 0.35 : 0.65,
+            x: window.innerWidth < 768 ? 20 : 120,
+            y: window.innerWidth < 768 ? 10 : 80,
+            isDragging: false,
+            startX: 0,
+            startY: 0
+        };
+
+        if (!this.viewer || !this.content) {
+            console.error('InteractionViewer: Critical Error - Elements missing');
+            return;
+        }
+
+        console.log('InteractionViewer: Initializing Definitive Mode...');
+        this.init();
+    }
+
+    init() {
+        this.update();
+        this.attachListeners();
+        console.log('InteractionViewer: Active & Running');
+    }
+
+    update() {
+        if (this.content) {
+            this.content.style.transform = `translate(${this.state.x}px, ${this.state.y}px) scale(${this.state.scale})`;
+        }
+    }
+
+    attachListeners() {
+        // Zoom Buttons
+        if (this.zoomInBtn) {
+            this.zoomInBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.handleZoom(0.15);
+            };
+        }
+        if (this.zoomOutBtn) {
+            this.zoomOutBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.handleZoom(-0.15);
+            };
+        }
+        if (this.zoomResetBtn) {
+            this.zoomResetBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.state.scale = window.innerWidth < 768 ? 0.35 : 0.65;
+                this.state.x = window.innerWidth < 768 ? 20 : 120;
+                this.state.y = window.innerWidth < 768 ? 10 : 80;
+                this.update();
+            };
+        }
+
+        // Panning Logic
+        this.viewer?.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            this.state.isDragging = true;
+            this.state.startX = e.clientX - this.state.x;
+            this.state.startY = e.clientY - this.state.y;
+            if (this.viewer) this.viewer.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!this.state.isDragging) return;
+            e.preventDefault();
+            this.state.x = e.clientX - this.state.startX;
+            this.state.y = e.clientY - this.state.startY;
+            this.update();
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (!this.state.isDragging) return;
+            this.state.isDragging = false;
+            if (this.viewer) this.viewer.style.cursor = 'grab';
+        });
+
+        this.viewer?.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            this.handleZoom(delta);
+        }, { passive: false });
+
+        // Touch Interaction
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+        this.viewer?.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                this.state.isDragging = true;
+                lastTouchX = e.touches[0].clientX - this.state.x;
+                lastTouchY = e.touches[0].clientY - this.state.y;
+            }
+        }, { passive: true });
+
+        this.viewer?.addEventListener('touchmove', (e) => {
+            if (!this.state.isDragging || e.touches.length !== 1) return;
+            this.state.x = e.touches[0].clientX - lastTouchX;
+            this.state.y = e.touches[0].clientY - lastTouchY;
+            this.update();
+        }, { passive: true });
+
+        this.viewer?.addEventListener('touchend', () => {
+            this.state.isDragging = false;
+        });
+    }
+
+    handleZoom(delta: number) {
+        const oldScale = this.state.scale;
+        this.state.scale = Math.min(Math.max(this.state.scale + delta, 0.1), 3);
+        const ratio = this.state.scale / oldScale;
+        this.state.x *= ratio;
+        this.state.y *= ratio;
+        this.update();
+    }
+}
+
+window.addEventListener('load', () => {
+    new InteractionViewer();
+});
+</script>
+
+<style>
+    .font-bebas {
+        font-family: 'Bebas Neue', sans-serif;
+    }
+    
+    .text-shadow-glow {
+        text-shadow: 0 0 40px rgba(255,255,255,0.4);
+    }
+
+    #zoom-content {
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+        -webkit-font-smoothing: antialiased;
+    }
+</style>

@@ -1,0 +1,81 @@
+---
+interface Props {
+  match: {
+    id: string;
+    homeTeam: { name: string; flag: string };
+    awayTeam: { name: string; flag: string };
+    score?: { home: number; away: number };
+    date: string;
+    time: string;
+    stadium: string;
+    city: string;
+    status: string;
+  };
+}
+
+const { match } = Astro.props;
+import { formatMatchDate } from '../lib/dateUtils';
+---
+
+<div class="flex flex-col w-full group/match mb-6 px-2">
+    <!-- Meta info: Date & Stadium -->
+    <div class="px-1 mb-2">
+        <div class="flex items-baseline gap-2 overflow-hidden">
+            <span class="text-[0.6rem] font-black text-gold/80 uppercase tracking-[1px] whitespace-nowrap">
+                {match.date === 'TBD' ? 'POR DEFINIR' : formatMatchDate(match.date).replace(/de /g, '')}
+            </span>
+            <span class="text-[0.6rem] font-bold text-white/30 uppercase tracking-[1px]">|</span>
+            <span class="text-[0.6rem] font-bold text-white/40 uppercase tracking-[1px]">{match.time}</span>
+        </div>
+        <div class="text-[0.5rem] text-white/20 uppercase tracking-[1.5px] truncate font-medium mt-0.5">
+            {match.stadium}
+        </div>
+    </div>
+
+    <!-- Match Card -->
+    <div class="relative bg-white/[0.03] border border-white/5 rounded-2xl p-3 backdrop-blur-xl hover:border-gold/30 hover:bg-white/[0.05] transition-all duration-500 shadow-2xl overflow-hidden group/card">
+        <!-- Hover Gradient Effect -->
+        <div class="absolute inset-0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-700 pointer-events-none bg-[radial-gradient(circle_at_top_right,var(--color-gold),transparent_70%)]"></div>
+        
+        <div class="flex flex-col gap-2.5 relative z-10">
+            <!-- Team 1 -->
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div class="w-6 h-6 rounded-full bg-white/5 p-0.5 border border-white/10 group-hover/card:border-white/20 transition-colors shrink-0 overflow-hidden shadow-lg">
+                        <img src={`/flags/${match.homeTeam.flag}`} alt="" class="w-full h-full object-cover rounded-full" />
+                    </div>
+                    <span class="text-[0.7rem] font-bold text-white/90 uppercase tracking-wider truncate drop-shadow-md">
+                        {match.homeTeam.name}
+                    </span>
+                </div>
+                <span class="text-sm font-bebas text-white w-5 text-center bg-white/5 rounded-md py-0.5 border border-white/5">
+                    {match.score?.home ?? '-'}
+                </span>
+            </div>
+
+            <!-- Separator -->
+            <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+
+            <!-- Team 2 -->
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div class="w-6 h-6 rounded-full bg-white/5 p-0.5 border border-white/10 group-hover/card:border-white/20 transition-colors shrink-0 overflow-hidden shadow-lg">
+                        <img src={`/flags/${match.awayTeam.flag}`} alt="" class="w-full h-full object-cover rounded-full" />
+                    </div>
+                    <span class="text-[0.7rem] font-bold text-white/90 uppercase tracking-wider truncate drop-shadow-md">
+                        {match.awayTeam.name}
+                    </span>
+                </div>
+                <span class="text-sm font-bebas text-white w-5 text-center bg-white/5 rounded-md py-0.5 border border-white/5">
+                    {match.score?.away ?? '-'}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .font-bebas {
+        font-family: 'Bebas Neue', sans-serif;
+    }
+</style>
