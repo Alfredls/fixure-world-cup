@@ -81,7 +81,16 @@ const sortedDates = Object.keys(groupedMatches).sort();
 
         <div class="relative z-10 max-w-[1100px] mx-auto px-0 pb-16 md:pb-8">
             <!-- Timeline Container -->
-            <div class="relative flex flex-col gap-24">
+            <div class="relative flex flex-col gap-24" id="timeline-container">
+                <!-- No Results Message -->
+                <div id="no-results-message" class="hidden flex-col items-center justify-center py-20 text-center animate-fade-in">
+                    <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6 text-white/30 border border-white/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <h3 class="font-bebas text-3xl md:text-4xl text-white tracking-widest mb-2">No hay partidos</h3>
+                    <p class="text-white/50 text-sm max-w-sm px-6">Ningún partido coincide con los filtros de fecha, grupo y equipo.</p>
+                </div>
+
                 {sortedDates.map((date, index) => (
                     <div class="timeline-day-group transition-all duration-500 ease-in-out" data-date={date}>
                         <TimelineRow 

@@ -118,19 +118,8 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
     </div>
 
     <!-- VIEW 2: GRID (Monthly) -->
-    <div id="view-grid" class="calendar-view hidden pb-4 pt-4 px-4 sm:px-0">
-        <!-- Controles de Grid Globales -->
-        <div class="flex justify-center mb-8">
-            <button 
-                class="calendar-date-btn snap-center flex items-center justify-center gap-2 px-6 py-2 rounded-full border border-white/10 bg-transparent outline-none transition-all duration-300 hover:bg-white/5 group"
-                data-target-date="all"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white/50 group-hover:text-gold transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                <span class="text-[0.65rem] font-bold tracking-[2px] uppercase text-white/50 pointer-events-none group-hover:text-white transition-colors">Limpiar Filtro</span>
-            </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 max-w-[900px] mx-auto">
+    <div id="view-grid" class="calendar-view hidden pb-4 pt-4 px-4 xl:px-0">
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_1fr_280px] gap-8 lg:gap-10 max-w-[1100px] mx-auto">
             
             <!-- JUNIO 2026 -->
             <div class="month-grid-wrapper bg-white/[0.02] border border-white/5 rounded-3xl p-6 md:p-8 backdrop-blur-md shadow-2xl">
@@ -204,6 +193,58 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                 </div>
             </div>
 
+            <!-- FILTROS AVANZADOS -->
+            <div class="filter-controls-wrapper flex flex-col gap-4 w-full lg:max-w-[280px]">
+                <div class="p-6 md:p-8 bg-white/[0.02] border border-white/5 rounded-3xl backdrop-blur-md shadow-2xl flex flex-col gap-6 h-full">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-6 bg-gold rounded-full"></div>
+                        <h3 class="text-xl font-bebas tracking-widest text-white uppercase">Filtros</h3>
+                    </div>
+
+                    <!-- Botón Limpiar Filtro -->
+                    <button 
+                        class="calendar-date-btn w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-white/10 bg-transparent outline-none transition-all duration-300 hover:bg-white/5 group"
+                        data-target-date="all"
+                        id="btn-clear-filters"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white/50 group-hover:text-gold transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        <span class="text-[0.7rem] font-bold tracking-[2px] uppercase text-white/50 pointer-events-none group-hover:text-white transition-colors flex-1 text-left">Limpiar Filtros</span>
+                    </button>
+
+                    <!-- Búsqueda por Grupo -->
+                    <div class="flex flex-col gap-4">
+                        <h4 class="text-[0.65rem] font-bold tracking-[2px] uppercase text-white/50">Por Grupo</h4>
+                        <div class="relative group">
+                            <select id="group-filter-select" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-gold hover:border-white/30 transition-colors appearance-none cursor-pointer">
+                                <option value="all">Todos los grupos</option>
+                                <option value="Grupo A">Grupo A</option>
+                                <option value="Grupo B">Grupo B</option>
+                                <option value="Grupo C">Grupo C</option>
+                                <option value="Grupo D">Grupo D</option>
+                                <option value="Grupo E">Grupo E</option>
+                                <option value="Grupo F">Grupo F</option>
+                                <option value="Grupo G">Grupo G</option>
+                                <option value="Grupo H">Grupo H</option>
+                                <option value="Grupo I">Grupo I</option>
+                                <option value="Grupo J">Grupo J</option>
+                                <option value="Grupo K">Grupo K</option>
+                                <option value="Grupo L">Grupo L</option>
+                            </select>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none group-hover:text-gold transition-colors"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                    </div>
+
+                    <!-- Búsqueda por Equipo -->
+                    <div class="flex flex-col gap-4">
+                        <h4 class="text-[0.65rem] font-bold tracking-[2px] uppercase text-white/50">Por Equipo</h4>
+                        <div class="relative group">
+                            <input id="team-search-input" type="text" placeholder="Buscar equipo..." class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-gold hover:border-white/30 transition-colors placeholder:text-white/20" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 group-hover:text-gold group-focus-within:text-gold transition-colors pointer-events-none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -265,6 +306,12 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                         v.classList.remove('animate-fade-in');
                     }
                 });
+
+                // Reset filters on tab switch
+                const clearBtn = document.getElementById('btn-clear-filters');
+                if (clearBtn) {
+                    clearBtn.click();
+                }
             });
         });
 
@@ -283,53 +330,137 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
             });
         }
 
-        // --- 3. GLOBAL DATE FILTERING ---
-        // Both the ribbon buttons and grid buttons share the same class and data-attribute!
+        // --- 3. GLOBAL FILTERING ---
         const dateButtons = document.querySelectorAll('.calendar-date-btn');
         const timelineGroups = document.querySelectorAll('.timeline-day-group');
-        
+        const groupSelect = document.getElementById('group-filter-select') as HTMLSelectElement;
+        const teamSearch = document.getElementById('team-search-input') as HTMLInputElement;
+
+        let currentActiveDate = 'all';
+        let currentGroup = 'all';
+        let currentTeam = '';
+
+        function applyFilters() {
+            let totalVisibleMatches = 0;
+
+            timelineGroups.forEach((group: Element) => {
+                const htmlGroup = group as HTMLElement;
+                const groupDate = htmlGroup.getAttribute('data-date');
+                let dayHasVisibleMatches = false;
+                
+                // Step 1: Check matches in this day
+                const matches = htmlGroup.querySelectorAll('.match-card-item');
+                matches.forEach((match: Element) => {
+                    const htmlMatch = match as HTMLElement;
+                    const mGroup = htmlMatch.getAttribute('data-group') || '';
+                    const mHome = htmlMatch.getAttribute('data-hometeam') || '';
+                    const mAway = htmlMatch.getAttribute('data-awayteam') || '';
+                    
+                    let showMatch = true;
+                    
+                    if (currentGroup !== 'all' && mGroup !== currentGroup) {
+                        showMatch = false;
+                    }
+                    
+                    if (currentTeam !== '' && !mHome.includes(currentTeam) && !mAway.includes(currentTeam)) {
+                        showMatch = false;
+                    }
+                    
+                    if (showMatch) {
+                        htmlMatch.style.display = 'block';
+                        dayHasVisibleMatches = true;
+                    } else {
+                        htmlMatch.style.display = 'none';
+                    }
+                });
+                
+                // Step 2: Check date for the whole group
+                let showDay = false;
+                if (currentActiveDate === 'all' || currentActiveDate === groupDate) {
+                    showDay = true;
+                }
+                
+                if (showDay && dayHasVisibleMatches) {
+                    totalVisibleMatches++;
+                    htmlGroup.style.display = 'block';
+                    // Force reflow
+                    void htmlGroup.offsetWidth;
+                    htmlGroup.style.opacity = '1';
+                    htmlGroup.style.transform = 'translateY(0) scale(1)';
+                } else {
+                    htmlGroup.style.opacity = '0';
+                    htmlGroup.style.transform = 'translateY(20px) scale(0.98)';
+                    setTimeout(() => {
+                        if (htmlGroup.style.opacity === '0') {
+                            htmlGroup.style.display = 'none';
+                        }
+                    }, 400); // 400ms Wait for transition
+                }
+            });
+
+            // Toggle No Results Message
+            const noResultsMsg = document.getElementById('no-results-message');
+            if (noResultsMsg) {
+                if (totalVisibleMatches === 0) {
+                    noResultsMsg.classList.remove('hidden');
+                    noResultsMsg.classList.add('flex');
+                } else {
+                    noResultsMsg.classList.add('hidden');
+                    noResultsMsg.classList.remove('flex');
+                }
+            }
+        }
+
         dateButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const targetBtn = (e.target as Element).closest('button');
                 if (!targetBtn) return;
                 
+                if (targetBtn.id === 'btn-clear-filters') {
+                    currentActiveDate = 'all';
+                    currentGroup = 'all';
+                    currentTeam = '';
+                    if (groupSelect) (groupSelect as HTMLSelectElement).value = 'all';
+                    if (teamSearch) (teamSearch as HTMLInputElement).value = '';
+                    
+                    dateButtons.forEach(b => b.classList.remove('active'));
+                    const allDateBtns = document.querySelectorAll('.calendar-date-btn[data-target-date="all"]:not(#btn-clear-filters)');
+                    allDateBtns.forEach(b => b.classList.add('active'));
+
+                    applyFilters();
+                    return;
+                }
+                
                 const targetDate = targetBtn.getAttribute('data-target-date');
                 if (!targetDate) return;
 
-                // Remove active from ALL date buttons globally
+                currentActiveDate = targetDate;
+                
                 dateButtons.forEach(b => b.classList.remove('active'));
                 
-                // Add active to ALL buttons matching this date (keeps Ribbon and Grid in sync!)
                 const matchedButtons = document.querySelectorAll(`.calendar-date-btn[data-target-date="${targetDate}"]`);
                 matchedButtons.forEach(b => b.classList.add('active'));
 
-                // Smooth scroll ONLY if the click came from the ribbon (or if we want to center the ribbon anyway)
                 if (targetBtn.closest('#ribbon-container')) {
                     targetBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 }
 
-                // Filter logic
-                timelineGroups.forEach((group: Element) => {
-                    const htmlGroup = group as HTMLElement;
-                    const groupDate = htmlGroup.getAttribute('data-date');
-                    
-                    if (targetDate === 'all' || targetDate === groupDate) {
-                        htmlGroup.style.display = 'block';
-                        // Force reflow
-                        void htmlGroup.offsetWidth;
-                        htmlGroup.style.opacity = '1';
-                        htmlGroup.style.transform = 'translateY(0) scale(1)';
-                    } else {
-                        htmlGroup.style.opacity = '0';
-                        htmlGroup.style.transform = 'translateY(20px) scale(0.98)';
-                        setTimeout(() => {
-                            if (htmlGroup.style.opacity === '0') {
-                                htmlGroup.style.display = 'none';
-                            }
-                        }, 400); // 400ms Wait for transition
-                    }
-                });
+                applyFilters();
             });
         });
+
+        if(groupSelect) {
+            groupSelect.addEventListener('change', (e) => {
+                currentGroup = (e.target as HTMLSelectElement).value;
+                applyFilters();
+            });
+        }
+
+        if(teamSearch) {
+            teamSearch.addEventListener('input', (e) => {
+                currentTeam = (e.target as HTMLInputElement).value.toLowerCase().trim();
+                applyFilters();
+            });
+        }
     });
 </script>
