@@ -14,7 +14,7 @@ import { resolveFlag } from '../lib/flags';
 ---
 
 <div class="flex flex-col items-center group/team-inner">
-  <div class={`w-28 h-28 md:w-64 md:h-64 rounded-full ${bgClass} flex items-center justify-center shadow-2xl relative z-10 overflow-hidden border border-white/10 p-2 md:p-4 transition-all duration-700 group-hover/team-inner:border-white/30`}>
+  <div class={`w-28 h-28 md:w-64 md:h-64 rounded-full flex items-center justify-center shadow-2xl relative z-10 overflow-hidden border border-white/25 p-2 md:p-4 transition-all duration-700 group-hover/team-inner:border-white/30`}>
     <div class="w-full h-full rounded-full overflow-hidden shadow-inner">
       {team.flag.endsWith('.png') ? (
         <Image src={resolveFlag(team.flag) as ImageMetadata} alt={team.name} class="w-full h-full object-cover" />

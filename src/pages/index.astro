@@ -10,86 +10,87 @@ import { formatMatchDate, formatMatchTime } from "../lib/dateUtils";
 // 1. Obtener la fecha del próximo partido disponible (hoy o en el futuro)
 const today = new Date().toISOString().split('T')[0];
 const targetDate = await getNextMatchDate(today) || '2026-06-11';
-//const targetDate = '2026-06-15';
+//const targetDate = '2026-06-26';
 
 // 2. Obtener todos los partidos de esa fecha
-const matchesData = await getMatchesByDate(targetDate);
+const allMatches = await getMatchesByDate(targetDate);
   
-// 3. Preparar datos para los componentes
-let liveMatchData;
+// 3. Lógica de Agrupación (Hero vs Daily)
+let heroMatches = [];
 let dailyMatches = [];
 
-if (matchesData && matchesData.length > 0) {
-  // El primer partido del día es el "Hero" (simulamos que es el principal)
-  const heroMatchRow = matchesData[0];
-  const home = heroMatchRow.home_team;
-  const away = heroMatchRow.away_team;
+if (allMatches && allMatches.length > 0) {
+    // 3.1. Separar por estado
+    const nonFinished = allMatches.filter(m => m.status !== 'finished');
+    const finished = allMatches.filter(m => m.status === 'finished');
 
-  const formattedDate = formatMatchDate(heroMatchRow.match_date);
-  const formattedTime = formatMatchTime(heroMatchRow.match_time);
-  
-  // Si la fase es 'group', mostramos 'Grupo A', etc. Usamos group_id de la tabla matches.
-  const phase = heroMatchRow.phase === 'group' 
-    ? `Grupo ${heroMatchRow.group_id}` 
-    : (heroMatchRow.phase?.toUpperCase() || "GRUPO");
+    let heroItems = [];
 
-  liveMatchData = {
-    id: heroMatchRow.id,
-    homeTeam: {
-      name: home?.name || "TBD",
-      flag: home?.flag_emoji || "unk.png",
-    },
-    awayTeam: {
-      name: away?.name || "TBD",
-      flag: away?.flag_emoji || "unk.png",
-    },
-    score: {
-      home: heroMatchRow.home_score || 0,
-      away: heroMatchRow.away_score || 0,
-    },
-    status: `${formattedDate} | ${formattedTime} | ${phase}`,
-    penalties: heroMatchRow.penalties || null,
-  };
+    if (nonFinished.length > 0) {
+        // Encontrar la hora más temprana de los que NO han terminado
+        const minTime = nonFinished.reduce((min, m) => 
+            (m.match_time < min ? m.match_time : min), nonFinished[0].match_time);
+        
+        // Todos los que coincidan en esa hora van al Hero
+        heroItems = nonFinished.filter(m => m.match_time === minTime);
+    } else if (finished.length > 0) {
+        // Si todos terminaron, mostrar los últimos del día en el Hero
+        const maxTime = finished.reduce((max, m) => 
+            (m.match_time > max ? m.match_time : max), finished[0].match_time);
+        heroItems = finished.filter(m => m.match_time === maxTime);
+    }
 
-  // Los demás partidos van al carrusel inferior
-  dailyMatches = matchesData.slice(1).map((m) => {
-    const formattedTime = formatMatchTime(m.match_time);
-    const groupName = m.phase === 'group' 
-      ? `Grupo ${m.group_id}` 
-      : (m.phase?.toUpperCase() || "");
+    // 3.2. Mapear Hero Matches
+    heroMatches = heroItems.map(m => {
+        const home = m.home_team;
+        const away = m.away_team;
+        const formattedDate = formatMatchDate(m.match_date);
+        const formattedTime = formatMatchTime(m.match_time);
+        const phase = m.phase === 'group' 
+            ? `Grupo ${m.group_id}` 
+            : (m.phase?.toUpperCase() || "GRUPO");
 
-    return {
-      homeTeam: {
-        name: m.home_team?.name || "TBD",
-        flag: m.home_team?.flag_emoji || "unk.png",
-      },
-      awayTeam: {
-        name: m.away_team?.name || "TBD",
-        flag: m.away_team?.flag_emoji || "unk.png",
-      },
-      score: { home: m.home_score || 0, away: m.away_score || 0 },
-      time: formattedTime,
-      group: groupName,
-    };
-  });
+        return {
+            id: m.id,
+            homeTeam: { name: home?.name || "TBD", flag: home?.flag_emoji || "unk.png" },
+            awayTeam: { name: away?.name || "TBD", flag: away?.flag_emoji || "unk.png" },
+            score: { home: m.home_score || 0, away: m.away_score || 0 },
+            status: `${formattedDate} | ${formattedTime} | ${phase}`,
+            penalties: m.penalties || null,
+        };
+    });
+
+    // 3.3. Todo lo que NO sea Hero va al carrusel inferior
+    const heroIds = new Set(heroItems.map(h => h.id));
+    dailyMatches = allMatches
+        .filter(m => !heroIds.has(m.id))
+        .map(m => {
+            const formattedTime = formatMatchTime(m.match_time);
+            const groupName = m.phase === 'group' 
+                ? `Grupo ${m.group_id}` 
+                : (m.phase?.toUpperCase() || "");
+
+            return {
+                homeTeam: { name: m.home_team?.name || "TBD", flag: m.home_team?.flag_emoji || "unk.png" },
+                awayTeam: { name: m.away_team?.name || "TBD", flag: m.away_team?.flag_emoji || "unk.png" },
+                score: { home: m.home_score || 0, away: m.away_score || 0 },
+                time: formattedTime,
+                group: groupName,
+                status: m.status
+            };
+        });
 } else {
-  // Fallback mocks si no hay nada en la DB
-  liveMatchData = {
-    homeTeam: { name: "México", flag: "mex.png" },
-    awayTeam: { name: "Sudáfrica", flag: "rsa.png" },
-    score: { home: 0, away: 0 },
-    status: "PRÓXIMO PARTIDO | 11 JUN | GRUPO A",
-  };
-
-  dailyMatches = [
-    {
-      homeTeam: { name: "Corea", flag: "kor.png" },
-      awayTeam: { name: "TBD", flag: "unk.png" },
-      score: { home: 0, away: 0 },
-      time: "14:00",
-      group: "GRUPO B",
-    },
-  ];
+    // Fallback mocks
+    heroMatches = [{
+        homeTeam: { name: "México", flag: "mex.png" },
+        awayTeam: { name: "Sudáfrica", flag: "rsa.png" },
+        score: { home: 0, away: 0 },
+        status: "PRÓXIMO PARTIDO | 11 JUN | GRUPO A",
+    }];
+    dailyMatches = [{
+        homeTeam: { name: "Corea", flag: "kor.png" }, awayTeam: { name: "TBD", flag: "unk.png" },
+        score: { home: 0, away: 0 }, time: "14:00", group: "GRUPO B",
+    }];
 }
 ---
 
@@ -105,17 +106,30 @@ if (matchesData && matchesData.length > 0) {
   </div>
 
   <div class="relative z-10 flex flex-col min-h-[calc(90vh-80px)] justify-center">
-    <!-- Central Live Match -->
+    <!-- Central Live Match Carrusel -->
     <div class="flex flex-col justify-center">
-      <LiveMatch {...liveMatchData} />
+      <LiveMatch matches={heroMatches} />
     </div>
 
     <!-- Bottom Areas Container -->
     <div class="w-full flex flex-col gap-6">
       <!-- Other Matches Of The Day -->
-      <div class="w-full flex flex-col mt-4 lg:mt-12 mb-4">
-        <h4 class="text-gold font-bold tracking-[3px] uppercase mb-8 text-center text-xl  sm:text-3xl" > Partidos del día</h4>
-        <div class="flex items-center justify-start md:justify-center gap-6 overflow-x-auto no-scrollbar pb-6 relative px-6 md:px-0 snap-x snap-mandatory">
+      <div class="w-full flex flex-col mt-4 lg:mt-12 mb-4 relative group/daily">
+        <div id="matches-header" class="flex items-center justify-between mb-8 px-0 md:px-6">
+          <h4 class="text-gold font-bold tracking-[3px] uppercase text-xl sm:text-3xl text-center md:text-left transition-all duration-500">Partidos del día</h4>
+          
+          <!-- Navigation Arrows at the top right -->
+          <div id="daily-btns-group" class="flex gap-2 transition-opacity duration-500">
+              <button id="daily-prev" class="p-2 sm:p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all opacity-0 backdrop-blur-md disabled:opacity-0 disabled:pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <button id="daily-next" class="p-2 sm:p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all opacity-0 backdrop-blur-md disabled:opacity-0 disabled:pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+          </div>
+        </div>
+
+        <div id="daily-matches-container" class="flex items-center justify-start md:justify-center gap-6 overflow-x-auto no-scrollbar pb-6 relative px-6 md:px-0 snap-x snap-mandatory scroll-smooth">
           {dailyMatches.map((match) => <CompactMatchCard {...match} />)}
         </div>
       </div>
@@ -125,4 +139,92 @@ if (matchesData && matchesData.length > 0) {
     </div>
   </div>
 </Layout>
+
+<script>
+  function initDailyNavigation() {
+    const container = document.getElementById('daily-matches-container');
+    const header = document.getElementById('matches-header');
+    const btnGroup = document.getElementById('daily-btns-group');
+    const prevBtn = document.getElementById('daily-prev') as HTMLButtonElement | null;
+    const nextBtn = document.getElementById('daily-next') as HTMLButtonElement | null;
+    const title = header?.querySelector('h4');
+
+    if (!container || !prevBtn || !nextBtn) return;
+
+    function updateArrowVisibility() {
+        if (!container || !prevBtn || !nextBtn) return;
+        const { scrollLeft, scrollWidth, clientWidth } = container;
+        const hasOverflow = scrollWidth > (clientWidth + 10);
+
+        if (!hasOverflow) {
+            prevBtn.style.opacity = '0';
+            nextBtn.style.opacity = '0';
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            
+            // Layout adjustments for Centering
+            if (header) {
+                header.classList.remove('justify-between');
+                header.classList.add('justify-center');
+            }
+            if (btnGroup) {
+                btnGroup.classList.add('hidden');
+            }
+            if (title) {
+                title.classList.add('text-center');
+                title.classList.remove('md:text-left');
+            }
+            
+            container.classList.add('md:justify-center');
+            container.classList.remove('md:justify-start');
+        } else {
+            // Layout adjustments for Side Arrows
+            if (header) {
+                header.classList.add('justify-between');
+                header.classList.remove('justify-center');
+            }
+            if (btnGroup) {
+                btnGroup.classList.remove('hidden');
+            }
+            if (title) {
+                title.classList.remove('text-center');
+                title.classList.add('md:text-left');
+            }
+
+            container.classList.remove('md:justify-center');
+            container.classList.add('md:justify-start');
+            
+            const atStart = scrollLeft <= 10;
+            const atEnd = scrollLeft + clientWidth >= scrollWidth - 15;
+
+            prevBtn.style.opacity = atStart ? '0' : '1';
+            nextBtn.style.opacity = atEnd ? '0' : '1';
+            prevBtn.disabled = atStart;
+            nextBtn.disabled = atEnd;
+        }
+    }
+
+    prevBtn.addEventListener('click', () => {
+        container.scrollBy({ left: -400, behavior: 'smooth' });
+    });
+
+    nextBtn.addEventListener('click', () => {
+        container.scrollBy({ left: 400, behavior: 'smooth' });
+    });
+
+    container.addEventListener('scroll', updateArrowVisibility);
+    
+    // Initial and resize checks
+    const resizeObserver = new ResizeObserver(() => {
+        updateArrowVisibility();
+    });
+    resizeObserver.observe(container);
+    
+    // Fallback for initial load
+    setTimeout(updateArrowVisibility, 100);
+  }
+
+  initDailyNavigation();
+  document.addEventListener('astro:page-load', initDailyNavigation);
+</script>
 
