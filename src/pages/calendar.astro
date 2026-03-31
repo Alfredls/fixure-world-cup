@@ -1,60 +1,17 @@
 ---
+export const prerender = true;
+
 import Layout from '../layouts/Layout.astro';
 import BackgroundBlobs from '../components/BackgroundBlobs.astro';
 import TimelineRow from '../components/TimelineRow.astro';
 import VisualCalendar from '../components/VisualCalendar.astro';
-import { supabase } from '../lib/supabase';
-import { formatMatchTime } from '../lib/dateUtils';
+import { getAllCalendarMatches } from '../lib/db';
+import type { CalendarMatch } from '../types';
 
-// Intentar obtener datos de Supabase
-let matches = [];
-const { data: matchesData, error } = await supabase
-    .from('matches')
-    .select(`
-        id,
-        match_date,
-        match_time,
-        status,
-        phase,
-        group_id,
-        home_team:teams!home_team_id(name, flag_emoji),
-        away_team:teams!away_team_id(name, flag_emoji),
-        venue:venues(name, city)
-    `)
-    .order('match_date', { ascending: true })
-    .order('match_time', { ascending: true });
-
-if (!error && matchesData && matchesData.length > 0) {
-    matches = matchesData.map(m => {
-        const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
-        const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
-        const venueInfo = Array.isArray(m.venue) ? m.venue[0] : m.venue;
-        
-        return {
-            id: m.id,
-            homeTeam: { name: home?.name || 'TBD', flag: home?.flag_emoji || 'unk.png' },
-            awayTeam: { name: away?.name || 'TBD', flag: away?.flag_emoji || 'unk.png' },
-            date: m.match_date,
-            time: formatMatchTime(m.match_time),
-            venue: venueInfo?.name || 'TBD',
-            city: venueInfo?.city || '',
-            phase: m.phase,
-            group: m.group_id ? `Grupo ${m.group_id}` : '',
-            status: m.status
-        };
-    });
-} else {
-    // Datos de prueba si no hay en DB
-    matches = [
-        { id: 1, homeTeam: { name: 'México', flag: 'mex.png' }, awayTeam: { name: 'Sudáfrica', flag: 'rsa.png' }, date: '2026-06-11', time: '15:00 Hrs.', venue: 'Estadio Azteca', city: 'Ciudad de México', phase: 'group', group: 'Grupo A', status: 'scheduled' },
-        { id: 2, homeTeam: { name: 'Canadá', flag: 'can.png' }, awayTeam: { name: 'Suiza', flag: 'sui.png' }, date: '2026-06-12', time: '15:00 Hrs.', venue: 'BMO Field', city: 'Toronto', phase: 'group', group: 'Grupo B', status: 'scheduled' },
-        { id: 3, homeTeam: { name: 'EE.UU.', flag: 'usa.png' }, awayTeam: { name: 'Paraguay', flag: 'par.png' }, date: '2026-06-12', time: '21:00 Hrs.', venue: 'SoFi Stadium', city: 'Los Angeles', phase: 'group', group: 'Grupo D', status: 'scheduled' },
-        { id: 4, homeTeam: { name: 'Brasil', flag: 'bra.png' }, awayTeam: { name: 'Marruecos', flag: 'mar.png' }, date: '2026-06-13', time: '18:00 Hrs.', venue: 'MetLife Stadium', city: 'New York/NJ', phase: 'group', group: 'Grupo C', status: 'scheduled' },
-    ];
-}
+const matches: CalendarMatch[] = await getAllCalendarMatches();
 
 // Agrupar por fecha
-const groupedMatches: any = matches.reduce((acc: any, match: any) => {
+const groupedMatches = matches.reduce((acc: Record<string, CalendarMatch[]>, match) => {
     if (!acc[match.date]) acc[match.date] = [];
     acc[match.date].push(match);
     return acc;

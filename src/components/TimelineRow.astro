@@ -2,22 +2,12 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import { getDayInfo } from '../lib/dateUtils';
-
-interface Match {
-    id: string | number;
-    homeTeam: { name: string; flag: string };
-    awayTeam: { name: string; flag: string };
-    time: string;
-    venue: string;
-    city: string;
-    phase?: string;
-    group?: string;
-    status: string;
-}
+import type { CalendarMatch } from '../types';
+import { resolveFlag } from '../lib/flags';
 
 interface Props {
     date: string;
-    dayMatches: Match[];
+    dayMatches: CalendarMatch[];
     index: number;
     isLast: boolean;
 }
@@ -41,13 +31,6 @@ function getDateColor(i: number) {
 
 const color = getDateColor(index);
 const nextColor = getDateColor(index + 1);
-
-const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/flags/*.{png,jpg,jpeg,svg}', { eager: true });
-const resolveFlag = (flagName: string) => {
-    if (flagName.startsWith('http')) return flagName;
-    const path = `/src/assets/flags/${flagName}`;
-    return images[path] ? images[path].default : images['/src/assets/flags/unk.png'].default;
-};
 ---
 
 <div class="relative z-10 flex flex-col sm:flex-row gap-8 md:gap-16 group">
@@ -73,7 +56,7 @@ const resolveFlag = (flagName: string) => {
 
     <!-- Right: Matches -->
     <div class="flex-1 flex flex-col gap-8 ml-4 sm:ml-0">
-        {dayMatches.map((match: any) => (
+        {dayMatches.map((match) => (
             <div 
                 class="relative group/match match-card-item transition-all duration-300 transform" 
                 data-group={match.group || ''} 
@@ -92,7 +75,7 @@ const resolveFlag = (flagName: string) => {
                     ></div>
 
                     <div class="flex items-center gap-2 mb-8 text-[0.7rem] font-black tracking-[3px] uppercase justify-center">
-                        <span class="text-gold">{match.group} • {match.phase === 'group' ? 'Fase de Grupos' : match.phase.toUpperCase()}</span>
+                        <span class="text-gold">{match.group} • {match.phase === 'group' ? 'Fase de Grupos' : (match.phase || '').toUpperCase()}</span>
                     </div>
 
                     <div class="flex flex-row lg:items-center justify-center lg:justify-between gap-4 lg:gap-10 mb-5">
