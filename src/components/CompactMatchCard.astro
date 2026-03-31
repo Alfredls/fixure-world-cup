@@ -1,4 +1,7 @@
 ---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
 interface Props {
   homeTeam: { name: string; flag: string };
   awayTeam: { name: string; flag: string };
@@ -9,6 +12,12 @@ interface Props {
 }
 
 const { homeTeam, awayTeam, score, time, group } = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/flags/*.{png,jpg,jpeg,svg}', { eager: true });
+const resolveFlag = (flagName: string) => {
+    const path = `/src/assets/flags/${flagName}`;
+    return images[path] ? images[path].default : images['/src/assets/flags/unk.png'].default;
+};
 ---
 
 <div class="flex flex-col min-w-[180px] snap-center px-4">
@@ -23,11 +32,7 @@ const { homeTeam, awayTeam, score, time, group } = Astro.props;
   <div class="flex items-center justify-center gap-4 mb-2">
     <!-- Home Logo -->
     <div class="w-10 h-10 rounded-full bg-[#2a5b7c] flex items-center justify-center text-xl shadow-lg shrink-0 overflow-hidden">
-      {homeTeam.flag.endsWith('.png') ? (
-        <img src={`/flags/${homeTeam.flag}`} alt={homeTeam.name} class="w-full h-full object-cover" />
-      ) : (
-        homeTeam.flag
-      )}
+      <Image src={resolveFlag(homeTeam.flag)} alt={homeTeam.name} class="w-full h-full object-cover" />
     </div>
     
     <!-- Score -->
@@ -39,11 +44,7 @@ const { homeTeam, awayTeam, score, time, group } = Astro.props;
 
     <!-- Away Logo -->
     <div class="w-10 h-10 rounded-full bg-[#1e2336] flex items-center justify-center text-xl shadow-lg shrink-0 overflow-hidden">
-      {awayTeam.flag.endsWith('.png') ? (
-        <img src={`/flags/${awayTeam.flag}`} alt={awayTeam.name} class="w-full h-full object-cover" />
-      ) : (
-        awayTeam.flag
-      )}
+      <Image src={resolveFlag(awayTeam.flag)} alt={awayTeam.name} class="w-full h-full object-cover" />
     </div>
   </div>
 

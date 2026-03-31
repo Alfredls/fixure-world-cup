@@ -1,6 +1,10 @@
 ---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
 interface Props {
   match: {
+
     id: string;
     homeTeam: { name: string; flag: string };
     awayTeam: { name: string; flag: string };
@@ -15,6 +19,12 @@ interface Props {
 
 const { match } = Astro.props;
 import { formatMatchDate } from '../lib/dateUtils';
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/flags/*.{png,jpg,jpeg,svg}', { eager: true });
+const resolveFlag = (flagName: string) => {
+    const path = `/src/assets/flags/${flagName}`;
+    return images[path] ? images[path].default : images['/src/assets/flags/unk.png'].default;
+};
 ---
 
 <div class="flex flex-col w-full group/match mb-6 px-2">
@@ -41,8 +51,8 @@ import { formatMatchDate } from '../lib/dateUtils';
             <!-- Team 1 -->
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                    <div class="w-6 h-6 rounded-full bg-white/5 p-0.5 border border-white/10 group-hover/card:border-white/20 transition-colors shrink-0 overflow-hidden shadow-lg">
-                        <img src={`/flags/${match.homeTeam.flag}`} alt="" class="w-full h-full object-cover rounded-full" />
+                    <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+                        <Image src={resolveFlag(match.homeTeam.flag)} alt="" class="w-full h-full object-cover rounded-full" />
                     </div>
                     <span class="text-[0.7rem] font-bold text-white/90 uppercase tracking-wider truncate drop-shadow-md">
                         {match.homeTeam.name}
@@ -59,8 +69,8 @@ import { formatMatchDate } from '../lib/dateUtils';
             <!-- Team 2 -->
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                    <div class="w-6 h-6 rounded-full bg-white/5 p-0.5 border border-white/10 group-hover/card:border-white/20 transition-colors shrink-0 overflow-hidden shadow-lg">
-                        <img src={`/flags/${match.awayTeam.flag}`} alt="" class="w-full h-full object-cover rounded-full" />
+                    <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                        <Image src={resolveFlag(match.awayTeam.flag)} alt="" class="w-full h-full object-cover rounded-full" />
                     </div>
                     <span class="text-[0.7rem] font-bold text-white/90 uppercase tracking-wider truncate drop-shadow-md">
                         {match.awayTeam.name}

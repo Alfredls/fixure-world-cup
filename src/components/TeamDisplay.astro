@@ -1,4 +1,7 @@
 ---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
 interface Props {
   team: { name: string; flag: string };
   bgClass: string;
@@ -6,12 +9,18 @@ interface Props {
 }
 
 const { team, bgClass, nameClassName = "" } = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/flags/*.{png,jpg,jpeg,svg}', { eager: true });
+const resolveFlag = (flagName: string) => {
+    const path = `/src/assets/flags/${flagName}`;
+    return images[path] ? images[path].default : images['/src/assets/flags/unk.png'].default;
+};
 ---
 
 <div class="flex flex-col items-center">
   <div class={`w-24 h-24 md:w-56 md:h-56 rounded-full ${bgClass} flex items-center justify-center shadow-2xl relative z-10 overflow-hidden`}>
     {team.flag.endsWith('.png') ? (
-      <img src={`/flags/${team.flag}`} alt={team.name} class="w-full h-full object-cover" />
+      <Image src={resolveFlag(team.flag)} alt={team.name} class="w-full h-full object-cover" />
     ) : (
       <span class="text-6xl md:text-8xl">{team.flag}</span>
     )}

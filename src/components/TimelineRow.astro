@@ -1,9 +1,23 @@
 ---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
 import { getDayInfo } from '../lib/dateUtils';
+
+interface Match {
+    id: string | number;
+    homeTeam: { name: string; flag: string };
+    awayTeam: { name: string; flag: string };
+    time: string;
+    venue: string;
+    city: string;
+    phase?: string;
+    group?: string;
+    status: string;
+}
 
 interface Props {
     date: string;
-    dayMatches: any[];
+    dayMatches: Match[];
     index: number;
     isLast: boolean;
 }
@@ -27,6 +41,13 @@ function getDateColor(i: number) {
 
 const color = getDateColor(index);
 const nextColor = getDateColor(index + 1);
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/flags/*.{png,jpg,jpeg,svg}', { eager: true });
+const resolveFlag = (flagName: string) => {
+    if (flagName.startsWith('http')) return flagName;
+    const path = `/src/assets/flags/${flagName}`;
+    return images[path] ? images[path].default : images['/src/assets/flags/unk.png'].default;
+};
 ---
 
 <div class="relative z-10 flex flex-col sm:flex-row gap-8 md:gap-16 group">
@@ -72,7 +93,11 @@ const nextColor = getDateColor(index + 1);
                     <div class="flex flex-row lg:items-center justify-center lg:justify-between gap-4 lg:gap-10 mb-5">
                         <div class="flex items-center gap-6 group/team flex-col lg:flex-row">
                             <div class="w-16 h-16 rounded-full bg-white/5 p-1.5 border border-white/10 group-hover/card:border-white/30 transition-all duration-700 overflow-hidden shadow-2xl transform group-hover/card:scale-105">
-                                <img src={match.homeTeam.flag.startsWith('http') ? match.homeTeam.flag : `/flags/${match.homeTeam.flag}`} alt="" class="w-full h-full object-cover rounded-full" />
+                                {typeof resolveFlag(match.homeTeam.flag) === 'string' ? (
+                                    <img src={resolveFlag(match.homeTeam.flag) as string} alt="" class="w-full h-full object-cover rounded-full" />
+                                ) : (
+                                    <Image src={resolveFlag(match.homeTeam.flag) as ImageMetadata} alt="" class="w-full h-full object-cover rounded-full" />
+                                )}
                             </div>
                             <span class="text-xl md:text-2xl font-bebas text-white tracking-widest group-hover/card:text-white transition-colors duration-500">{match.homeTeam.name}</span>
                         </div>
@@ -85,7 +110,11 @@ const nextColor = getDateColor(index + 1);
 
                         <div class="flex items-center lg:flex-row-reverse gap-6 group/team text-right flex-col lg:flex-row">
                             <div class="w-16 h-16 rounded-full bg-white/5 p-1.5 border border-white/10 group-hover/card:border-white/30 transition-all duration-700 overflow-hidden shadow-2xl transform group-hover/card:scale-105">
-                                <img src={match.awayTeam.flag.startsWith('http') ? match.awayTeam.flag : `/flags/${match.awayTeam.flag}`} alt="" class="w-full h-full object-cover rounded-full" />
+                                {typeof resolveFlag(match.awayTeam.flag) === 'string' ? (
+                                    <img src={resolveFlag(match.awayTeam.flag) as string} alt="" class="w-full h-full object-cover rounded-full" />
+                                ) : (
+                                    <Image src={resolveFlag(match.awayTeam.flag) as ImageMetadata} alt="" class="w-full h-full object-cover rounded-full" />
+                                )}
                             </div>
                             <span class="text-xl md:text-2xl font-bebas text-white tracking-widest group-hover/card:text-white transition-colors duration-500">{match.awayTeam.name}</span>
                         </div>

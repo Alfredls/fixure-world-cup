@@ -1,8 +1,12 @@
 ---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
 interface Team {
 	id: string;
 	name: string;
 	flag_emoji: string;
+	seed?: number;
 }
 
 interface Props {
@@ -12,6 +16,12 @@ interface Props {
 }
 
 const { id, name, teams } = Astro.props;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/flags/*.{png,jpg,jpeg,svg}', { eager: true });
+const resolveFlag = (flagName: string) => {
+    const path = `/src/assets/flags/${flagName}`;
+    return images[path] ? images[path].default : images['/src/assets/flags/unk.png']?.default;
+};
 
 // Map group ID to a theme color
 const getGroupTheme = (groupId: string) => {
@@ -52,8 +62,14 @@ const theme = getGroupTheme(id);
         {teams.map((team) => (
           <li class="flex items-center justify-between group/item">
             <div class="flex items-center gap-3">
-              <div class="min-w-12 max-w-12 min-h-12 max-h-12 rounded-full bg-white/5 p-1.5 border border-white/10 shadow-2xl "> 
-                <img src={`/flags/${team.flag_emoji}`} alt="" class="min-w-full min-h-full object-cover rounded-full aspect-square"> 
+              <div class="relative w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/10 group-hover:border-gold/50 transition-colors bg-[#0a0a0a] shadow-[0_0_15px_rgba(0,0,0,0.5)] shrink-0 group-hover:shadow-[0_0_20px_rgba(206,171,82,0.3)]">
+                <Image src={resolveFlag(team.flag_emoji) as ImageMetadata} alt="" class="min-w-full min-h-full object-cover rounded-full aspect-square" /> 
+                {/* Optional Seed badge */}
+                {team.seed && (
+                  <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-gold rounded-full flex items-center justify-center text-[0.6rem] font-bold text-black border-2 border-[#1a1a1a]">
+                    {team.seed}
+                  </div>
+                )}
               </div>
               <span class="text-white/90 font-medium text-sm md:text-base tracking-tight group-hover/item:text-white transition-colors uppercase font-sans">
                 {team.name}
