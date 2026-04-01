@@ -6,12 +6,23 @@ import GroupCard from '../components/GroupCard.astro';
 import BackgroundBlobs from '../components/BackgroundBlobs.astro';
 import { supabase } from '../lib/supabase';
 
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("[Supabase Config Error]: No se encontraron las variables de entorno PUBLIC_SUPABASE_URL o PUBLIC_SUPABASE_ANON_KEY en el archivo .env");
+}
+
 // Intentar obtener datos de Supabase
 let groups = [];
 const { data: groupsData, error } = await supabase
 	.from('groups')
 	.select('id, name, teams(id, name, flag_emoji)')
     .order('name', { ascending: true });
+
+if (error) {
+    console.error("[Supabase Error]:", error.message, error.details);
+}
 
 if (!error && groupsData && groupsData.length > 0) {
     groups = groupsData;

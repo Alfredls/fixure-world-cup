@@ -105,7 +105,7 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
   -- Grupo I
   (gen_random_uuid(), 'Francia',           'fra.png', 'UEFA',     'I'),
   (gen_random_uuid(), 'Senegal',           'sen.png', 'CAF',      'I'),
-  (gen_random_uuid(), 'Por definir',       'unk.png', 'AFC',      'I'),
+  (gen_random_uuid(), 'Irak',              'irq.png', 'AFC',      'I'),
   (gen_random_uuid(), 'Noruega',           'nor.png', 'UEFA',     'I'),
 
   -- Grupo J
@@ -116,7 +116,7 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
 
   -- Grupo K
   (gen_random_uuid(), 'Portugal',          'por.png', 'UEFA',     'K'),
-  (gen_random_uuid(), 'República Democrática del Congo',  'cod.png', 'CAF',      'K'),
+  (gen_random_uuid(), 'Rep. Dem. del Congo','cod.png', 'CAF',      'K'),
   (gen_random_uuid(), 'Uzbekistán',        'uzb.png', 'AFC',      'K'),
   (gen_random_uuid(), 'Colombia',          'col.png', 'CONMEBOL', 'K'),
 
@@ -483,14 +483,14 @@ VALUES
     (SELECT id FROM v WHERE name='MetLife Stadium'), 'scheduled'),
 
   (gen_random_uuid(), 'I', 'group',
-    (SELECT id FROM t WHERE name='Por definir (I3)'),
+    (SELECT id FROM t WHERE name='Irak'),
     (SELECT id FROM t WHERE name='Noruega'),
     '2026-06-16', '18:00',
     (SELECT id FROM v WHERE name='Gillette Stadium'), 'scheduled'),
 
   (gen_random_uuid(), 'I', 'group',
     (SELECT id FROM t WHERE name='Francia'),
-    (SELECT id FROM t WHERE name='Por definir (I3)'),
+    (SELECT id FROM t WHERE name='Irak'),
     '2026-06-22', '17:00',
     (SELECT id FROM v WHERE name='Lincoln Financial Field'), 'scheduled'),
 
@@ -508,7 +508,7 @@ VALUES
 
   (gen_random_uuid(), 'I', 'group',
     (SELECT id FROM t WHERE name='Senegal'),
-    (SELECT id FROM t WHERE name='Por definir (I3)'),
+    (SELECT id FROM t WHERE name='Irak'),
     '2026-06-26', '15:00',
     (SELECT id FROM v WHERE name='BMO Field'), 'scheduled'),
 
@@ -552,7 +552,7 @@ VALUES
   -- ── GRUPO K ──────────────────────────────────────────────
   (gen_random_uuid(), 'K', 'group',
     (SELECT id FROM t WHERE name='Portugal'),
-    (SELECT id FROM t WHERE name='Rep. democratica del Congo'),
+    (SELECT id FROM t WHERE name='Rep. Dem. del Congo'),
     '2026-06-17', '13:00',
     (SELECT id FROM v WHERE name='NRG Stadium'), 'scheduled'),
 
@@ -570,7 +570,7 @@ VALUES
 
   (gen_random_uuid(), 'K', 'group',
     (SELECT id FROM t WHERE name='Colombia'),
-    (SELECT id FROM t WHERE name='Rep. democratica del Congo'),
+    (SELECT id FROM t WHERE name='Rep. Dem. del Congo'),
     '2026-06-23', '22:00',
     (SELECT id FROM v WHERE name='Estadio Akron'), 'scheduled'),
 
@@ -581,7 +581,7 @@ VALUES
     (SELECT id FROM v WHERE name='Hard Rock Stadium'), 'scheduled'),
 
   (gen_random_uuid(), 'K', 'group',
-    (SELECT id FROM t WHERE name='Rep. democratica del Congo'),
+    (SELECT id FROM t WHERE name='Rep. Dem. del Congo'),
     (SELECT id FROM t WHERE name='Uzbekistán'),
     '2026-06-27', '19:30',
     (SELECT id FROM v WHERE name='Mercedes-Benz Stadium'), 'scheduled'),
@@ -680,3 +680,29 @@ SELECT
   0, 0, 0, 0, 0, 0, 0, 0, false
 FROM teams
 WHERE group_id IS NOT NULL;
+
+
+-- ============================================================
+-- 6. SECURITY (RLS) - Acceso público para Fixture
+-- ============================================================
+
+-- 1. Habilitar RLS en todas las tablas
+ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE venues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE standings ENABLE ROW LEVEL SECURITY;
+
+-- 2. Eliminar políticas previas (para evitar errores al re-ejecutar)
+DROP POLICY IF EXISTS "Allow public read access on groups" ON groups;
+DROP POLICY IF EXISTS "Allow public read access on venues" ON venues;
+DROP POLICY IF EXISTS "Allow public read access on teams" ON teams;
+DROP POLICY IF EXISTS "Allow public read access on matches" ON matches;
+DROP POLICY IF EXISTS "Allow public read access on standings" ON standings;
+
+-- 3. Crear políticas de lectura pública (SELECT)
+CREATE POLICY "Allow public read access on groups" ON groups FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on venues" ON venues FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on teams" ON teams FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on matches" ON matches FOR SELECT USING (true);
+CREATE POLICY "Allow public read access on standings" ON standings FOR SELECT USING (true);
