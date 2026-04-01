@@ -188,12 +188,12 @@ VALUES
 
   (gen_random_uuid(), 'A', 'group',
     (SELECT id FROM t WHERE name='República de Corea'),
-    (SELECT id FROM t WHERE name='Por definir (A4)'),
+    (SELECT id FROM t WHERE name='Chequia'),
     '2026-06-11', '22:00',
     (SELECT id FROM v WHERE name='Estadio Akron'), 'scheduled'),
 
   (gen_random_uuid(), 'A', 'group',
-    (SELECT id FROM t WHERE name='Por definir (A4)'),
+    (SELECT id FROM t WHERE name='Chequia'),
     (SELECT id FROM t WHERE name='Sudáfrica'),
     '2026-06-18', '12:00',
     (SELECT id FROM v WHERE name='Mercedes-Benz Stadium'), 'scheduled'),
@@ -205,7 +205,7 @@ VALUES
     (SELECT id FROM v WHERE name='Estadio Akron'), 'scheduled'),
 
   (gen_random_uuid(), 'A', 'group',
-    (SELECT id FROM t WHERE name='Por definir (A4)'),
+    (SELECT id FROM t WHERE name='Chequia'),
     (SELECT id FROM t WHERE name='México'),
     '2026-06-24', '21:00',
     (SELECT id FROM v WHERE name='Estadio Azteca'), 'scheduled'),
@@ -219,7 +219,7 @@ VALUES
   -- ── GRUPO B ──────────────────────────────────────────────
   (gen_random_uuid(), 'B', 'group',
     (SELECT id FROM t WHERE name='Canadá'),
-    (SELECT id FROM t WHERE name='Por definir (B2)'),
+    (SELECT id FROM t WHERE name='Bosnia y Herzegovina'),
     '2026-06-12', '15:00',
     (SELECT id FROM v WHERE name='BMO Field'), 'scheduled'),
 
@@ -231,7 +231,7 @@ VALUES
 
   (gen_random_uuid(), 'B', 'group',
     (SELECT id FROM t WHERE name='Suiza'),
-    (SELECT id FROM t WHERE name='Por definir (B2)'),
+    (SELECT id FROM t WHERE name='Bosnia y Herzegovina'),
     '2026-06-18', '15:00',
     (SELECT id FROM v WHERE name='SoFi Stadium'), 'scheduled'),
 
@@ -248,7 +248,7 @@ VALUES
     (SELECT id FROM v WHERE name='BC Place'), 'scheduled'),
 
   (gen_random_uuid(), 'B', 'group',
-    (SELECT id FROM t WHERE name='Por definir (B2)'),
+    (SELECT id FROM t WHERE name='Bosnia y Herzegovina'),
     (SELECT id FROM t WHERE name='Catar'),
     '2026-06-24', '15:00',
     (SELECT id FROM v WHERE name='Lumen Field'), 'scheduled'),
@@ -299,7 +299,7 @@ VALUES
 
   (gen_random_uuid(), 'D', 'group',
     (SELECT id FROM t WHERE name='Australia'),
-    (SELECT id FROM t WHERE name='Por definir (D4)'),
+    (SELECT id FROM t WHERE name='Turquía'),
     '2026-06-13', '00:00',
     (SELECT id FROM v WHERE name='BC Place'), 'scheduled'),
 
@@ -310,13 +310,13 @@ VALUES
     (SELECT id FROM v WHERE name='Lumen Field'), 'scheduled'),
 
   (gen_random_uuid(), 'D', 'group',
-    (SELECT id FROM t WHERE name='Por definir (D4)'),
+    (SELECT id FROM t WHERE name='Turquía'),
     (SELECT id FROM t WHERE name='Paraguay'),
     '2026-06-19', '00:00',
     (SELECT id FROM v WHERE name='Levi''s Stadium'), 'scheduled'),
 
   (gen_random_uuid(), 'D', 'group',
-    (SELECT id FROM t WHERE name='Por definir (D4)'),
+    (SELECT id FROM t WHERE name='Turquía'),
     (SELECT id FROM t WHERE name='Estados Unidos'),
     '2026-06-25', '22:00',
     (SELECT id FROM v WHERE name='SoFi Stadium'), 'scheduled'),
@@ -372,14 +372,14 @@ VALUES
     (SELECT id FROM v WHERE name='AT&T Stadium'), 'scheduled'),
 
   (gen_random_uuid(), 'F', 'group',
-    (SELECT id FROM t WHERE name='Por definir (F3)'),
+    (SELECT id FROM t WHERE name='Suecia'),
     (SELECT id FROM t WHERE name='Túnez'),
     '2026-06-14', '22:00',
     (SELECT id FROM v WHERE name='Estadio BBVA'), 'scheduled'),
 
   (gen_random_uuid(), 'F', 'group',
     (SELECT id FROM t WHERE name='Países Bajos'),
-    (SELECT id FROM t WHERE name='Por definir (F3)'),
+    (SELECT id FROM t WHERE name='Suecia'),
     '2026-06-20', '13:00',
     (SELECT id FROM v WHERE name='NRG Stadium'), 'scheduled'),
 
@@ -391,7 +391,7 @@ VALUES
 
   (gen_random_uuid(), 'F', 'group',
     (SELECT id FROM t WHERE name='Japón'),
-    (SELECT id FROM t WHERE name='Por definir (F3)'),
+    (SELECT id FROM t WHERE name='Suecia'),
     '2026-06-25', '19:00',
     (SELECT id FROM v WHERE name='AT&T Stadium'), 'scheduled'),
 
@@ -552,7 +552,7 @@ VALUES
   -- ── GRUPO K ──────────────────────────────────────────────
   (gen_random_uuid(), 'K', 'group',
     (SELECT id FROM t WHERE name='Portugal'),
-    (SELECT id FROM t WHERE name='Por definir (K2)'),
+    (SELECT id FROM t WHERE name='Rep. democratica del Congo'),
     '2026-06-17', '13:00',
     (SELECT id FROM v WHERE name='NRG Stadium'), 'scheduled'),
 
@@ -570,7 +570,7 @@ VALUES
 
   (gen_random_uuid(), 'K', 'group',
     (SELECT id FROM t WHERE name='Colombia'),
-    (SELECT id FROM t WHERE name='Por definir (K2)'),
+    (SELECT id FROM t WHERE name='Rep. democratica del Congo'),
     '2026-06-23', '22:00',
     (SELECT id FROM v WHERE name='Estadio Akron'), 'scheduled'),
 
@@ -581,7 +581,7 @@ VALUES
     (SELECT id FROM v WHERE name='Hard Rock Stadium'), 'scheduled'),
 
   (gen_random_uuid(), 'K', 'group',
-    (SELECT id FROM t WHERE name='Por definir (K2)'),
+    (SELECT id FROM t WHERE name='Rep. democratica del Congo'),
     (SELECT id FROM t WHERE name='Uzbekistán'),
     '2026-06-27', '19:30',
     (SELECT id FROM v WHERE name='Mercedes-Benz Stadium'), 'scheduled'),
