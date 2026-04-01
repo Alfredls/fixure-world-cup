@@ -58,13 +58,13 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
   (gen_random_uuid(), 'México',            'mex.png', 'CONCACAF', 'A'),
   (gen_random_uuid(), 'Sudáfrica',         'rsa.png', 'CAF',      'A'),
   (gen_random_uuid(), 'República de Corea','kor.png', 'AFC',      'A'),
-  (gen_random_uuid(), 'Por definir (A4)',  'unk.png', 'UEFA',     'A'),
+  (gen_random_uuid(), 'Chequia',           'CZE.png', 'UEFA',     'A'),
 
   -- Grupo B
-  (gen_random_uuid(), 'Canadá',            'can.png', 'CONCACAF', 'B'),
-  (gen_random_uuid(), 'Por definir (B2)',  'unk.png', 'UEFA',     'B'),
-  (gen_random_uuid(), 'Catar',             'qat.png', 'AFC',      'B'),
-  (gen_random_uuid(), 'Suiza',             'sui.png', 'UEFA',     'B'),
+  (gen_random_uuid(), 'Canadá',                'can.png', 'CONCACAF', 'B'),
+  (gen_random_uuid(), 'Bosnia y Herzegovina',  'bih.png', 'UEFA',     'B'),
+  (gen_random_uuid(), 'Catar',                 'qat.png', 'AFC',      'B'),
+  (gen_random_uuid(), 'Suiza',                 'sui.png', 'UEFA',     'B'),
 
   -- Grupo C
   (gen_random_uuid(), 'Brasil',            'bra.png', 'CONMEBOL', 'C'),
@@ -76,7 +76,7 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
   (gen_random_uuid(), 'Estados Unidos',    'usa.png', 'CONCACAF', 'D'),
   (gen_random_uuid(), 'Paraguay',          'par.png', 'CONMEBOL', 'D'),
   (gen_random_uuid(), 'Australia',         'aus.png', 'AFC',      'D'),
-  (gen_random_uuid(), 'Por definir (D4)',  'unk.png', 'UEFA',     'D'),
+  (gen_random_uuid(), 'Turquía',           'tur.png', 'UEFA',     'D'),
 
   -- Grupo E
   (gen_random_uuid(), 'Alemania',          'ger.png', 'UEFA',     'E'),
@@ -87,7 +87,7 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
   -- Grupo F
   (gen_random_uuid(), 'Países Bajos',      'ned.png', 'UEFA',     'F'),
   (gen_random_uuid(), 'Japón',             'jpn.png', 'AFC',      'F'),
-  (gen_random_uuid(), 'Por definir (F3)',  'unk.png', 'UEFA',     'F'),
+  (gen_random_uuid(), 'Suecia',            'swe.png', 'UEFA',     'F'),
   (gen_random_uuid(), 'Túnez',             'tun.png', 'CAF',      'F'),
 
   -- Grupo G
@@ -105,7 +105,7 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
   -- Grupo I
   (gen_random_uuid(), 'Francia',           'fra.png', 'UEFA',     'I'),
   (gen_random_uuid(), 'Senegal',           'sen.png', 'CAF',      'I'),
-  (gen_random_uuid(), 'Por definir (I3)',  'unk.png', 'CONCACAF', 'I'),
+  (gen_random_uuid(), 'Por definir',       'unk.png', 'AFC',      'I'),
   (gen_random_uuid(), 'Noruega',           'nor.png', 'UEFA',     'I'),
 
   -- Grupo J
@@ -116,7 +116,7 @@ INSERT INTO teams (id, name, flag_emoji, confederation, group_id) VALUES
 
   -- Grupo K
   (gen_random_uuid(), 'Portugal',          'por.png', 'UEFA',     'K'),
-  (gen_random_uuid(), 'Por definir (K2)',  'unk.png', 'CAF',      'K'),
+  (gen_random_uuid(), 'República Democrática del Congo',  'cod.png', 'CAF',      'K'),
   (gen_random_uuid(), 'Uzbekistán',        'uzb.png', 'AFC',      'K'),
   (gen_random_uuid(), 'Colombia',          'col.png', 'CONMEBOL', 'K'),
 
