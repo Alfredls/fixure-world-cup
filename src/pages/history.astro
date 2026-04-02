@@ -438,9 +438,12 @@ class InteractionViewer {
     }
 }
 
-window.addEventListener('load', () => {
+function initBracket() {
     new InteractionViewer();
-});
+}
+
+initBracket();
+document.addEventListener('astro:page-load', initBracket);
 </script>
 
 <style>

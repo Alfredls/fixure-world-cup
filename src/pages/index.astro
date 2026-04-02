@@ -7,6 +7,9 @@ import GroupNav from "../components/GroupNav.astro";
 import { getNextMatchDate, getMatchesByDate } from "../lib/db";
 import { formatMatchDate, formatMatchTime } from "../lib/dateUtils";
 
+// Configurar Edge Caching en Netlify (60 segs max-age, 120 segs stale-while-revalidate)
+Astro.response.headers.set('Cache-Control', 'public, max-age=60, s-maxage=60, stale-while-revalidate=120');
+
 // 1. Obtener la fecha del próximo partido disponible (hoy o en el futuro)
 const today = new Date().toISOString().split('T')[0];
 const targetDate = await getNextMatchDate(today) || '2026-06-11';
@@ -100,6 +103,8 @@ if (allMatches && allMatches.length > 0) {
     <img
       src="./bg.webp"
       alt="stadium bg"
+      loading="lazy"
+      fetchpriority="low"
       class="w-full h-full object-cover opacity-25 object-bottom"
     />
     <div class="absolute inset-0 bg-gradient-to-b from-[#111111]/80 via-transparent to-[#111111]"></div>

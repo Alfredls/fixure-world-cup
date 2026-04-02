@@ -279,7 +279,7 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function initCalendar() {
         // --- 1. VIEW SWITCHER (TABS) ---
         const tabBtns = document.querySelectorAll('.calendar-tab-btn');
         const views = document.querySelectorAll('.calendar-view');
@@ -300,7 +300,7 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                 views.forEach(v => {
                     if (v.id === targetViewId) {
                         v.classList.remove('hidden');
-                        v.classList.add('animate-fade-in'); // Astro/Tailwind fade in if available, falling back to instant
+                        v.classList.add('animate-fade-in'); 
                     } else {
                         v.classList.add('hidden');
                         v.classList.remove('animate-fade-in');
@@ -322,12 +322,12 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
         if (ribbon && prevBtn && nextBtn) {
             const scrollAmount = 250;
-            prevBtn.addEventListener('click', () => {
+            prevBtn.onclick = () => {
                 ribbon.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            });
-            nextBtn.addEventListener('click', () => {
+            };
+            nextBtn.onclick = () => {
                 ribbon.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            });
+            };
         }
 
         // --- 3. GLOBAL FILTERING ---
@@ -348,7 +348,6 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                 const groupDate = htmlGroup.getAttribute('data-date');
                 let dayHasVisibleMatches = false;
                 
-                // Step 1: Check matches in this day
                 const matches = htmlGroup.querySelectorAll('.match-card-item');
                 matches.forEach((match: Element) => {
                     const htmlMatch = match as HTMLElement;
@@ -362,7 +361,7 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                         showMatch = false;
                     }
                     
-                    if (currentTeam !== '' && !mHome.includes(currentTeam) && !mAway.includes(currentTeam)) {
+                    if (currentTeam !== '' && !mHome.toLowerCase().includes(currentTeam) && !mAway.toLowerCase().includes(currentTeam)) {
                         showMatch = false;
                     }
                     
@@ -374,7 +373,6 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                     }
                 });
                 
-                // Step 2: Check date for the whole group
                 let showDay = false;
                 if (currentActiveDate === 'all' || currentActiveDate === groupDate) {
                     showDay = true;
@@ -383,8 +381,6 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                 if (showDay && dayHasVisibleMatches) {
                     totalVisibleMatches++;
                     htmlGroup.style.display = 'block';
-                    // Force reflow
-                    void htmlGroup.offsetWidth;
                     htmlGroup.style.opacity = '1';
                     htmlGroup.style.transform = 'translateY(0) scale(1)';
                 } else {
@@ -394,11 +390,10 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                         if (htmlGroup.style.opacity === '0') {
                             htmlGroup.style.display = 'none';
                         }
-                    }, 400); // 400ms Wait for transition
+                    }, 400); 
                 }
             });
 
-            // Toggle No Results Message
             const noResultsMsg = document.getElementById('no-results-message');
             if (noResultsMsg) {
                 if (totalVisibleMatches === 0) {
@@ -450,17 +445,21 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
         });
 
         if(groupSelect) {
-            groupSelect.addEventListener('change', (e) => {
+            groupSelect.onchange = (e) => {
                 currentGroup = (e.target as HTMLSelectElement).value;
                 applyFilters();
-            });
+            };
         }
 
         if(teamSearch) {
-            teamSearch.addEventListener('input', (e) => {
+            teamSearch.oninput = (e) => {
                 currentTeam = (e.target as HTMLInputElement).value.toLowerCase().trim();
                 applyFilters();
-            });
+            };
         }
-    });
+    }
+
+    // Initialize on first load and after view transitions
+    initCalendar();
+    document.addEventListener('astro:page-load', initCalendar);
 </script>
