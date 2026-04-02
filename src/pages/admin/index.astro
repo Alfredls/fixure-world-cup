@@ -1,0 +1,205 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { createClient } from '@supabase/supabase-js';
+
+const user = Astro.locals.user;
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+);
+
+// Obtener estadísticas de partidos
+const today = new Date().toISOString().split('T')[0];
+
+const [{ count: totalMatches }, { count: liveMatches }, { count: finishedMatches }, { data: todayMatches }] = await Promise.all([
+  supabase.from('matches').select('*', { count: 'exact', head: true }),
+  supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'live'),
+  supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'finished'),
+  supabase.from('matches')
+    .select(`id, match_time, status, home_score, away_score, phase, group_id,
+      home_team:teams!home_team_id(name, flag_emoji),
+      away_team:teams!away_team_id(name, flag_emoji)`)
+    .eq('match_date', today)
+    .order('match_time', { ascending: true })
+]);
+
+const scheduledMatches = (totalMatches || 0) - (finishedMatches || 0) - (liveMatches || 0);
+---
+
+<AdminLayout title="Dashboard" user={user}>
+  <style>
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 0.5rem;
+    }
+    .stat-value {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 2.4rem;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+    .stat-card.live .stat-value { color: #4ade80; }
+    .stat-card.gold .stat-value { color: #ceab52; }
+    .section-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.75rem;
+      margin-top: 1.5rem;
+      text-transform: uppercase;
+    }
+    .matches-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .matches-table th {
+      text-align: left;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.35);
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .matches-table td {
+      padding: 0.7rem 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+    .match-row:hover { background: rgba(255,255,255,0.03); }
+    .team-name { font-weight: 500; }
+    .score {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .badge-live { background: rgba(74,222,128,0.15); color: #4ade80; }
+    .badge-scheduled { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); }
+    .badge-finished { background: rgba(206,171,82,0.1); color: #ceab52; }
+    .edit-btn {
+      padding: 0.3rem 0.7rem;
+      background: rgba(206,171,82,0.1);
+      border: 1px solid rgba(206,171,82,0.2);
+      border-radius: 6px;
+      color: #ceab52;
+      font-size: 0.72rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .edit-btn:hover { background: rgba(206,171,82,0.2); }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255,255,255,0.25);
+      font-size: 0.85rem;
+    }
+    .card-wrapper {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+  </style>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card live">
+      <div class="stat-label">🔴 En Vivo</div>
+      <div class="stat-value">{liveMatches ?? 0}</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-label">⚽ Total Partidos</div>
+      <div class="stat-value">{totalMatches ?? 0}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">✅ Finalizados</div>
+      <div class="stat-value">{finishedMatches ?? 0}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">📅 Por Jugar</div>
+      <div class="stat-value">{scheduledMatches}</div>
+    </div>
+  </div>
+
+  <!-- Today's Matches -->
+  <p class="section-title">Partidos de Hoy — {today}</p>
+  <div class="card-wrapper">
+    {todayMatches && todayMatches.length > 0 ? (
+      <table class="matches-table">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Local</th>
+            <th>Marcador</th>
+            <th>Visitante</th>
+            <th>Fase</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {todayMatches.map((m: any) => {
+            const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
+            const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+            return (
+              <tr class="match-row">
+                <td style="color:rgba(255,255,255,0.45); font-size:0.8rem">{m.match_time?.slice(0,5)}</td>
+                <td class="team-name">{home?.name}</td>
+                <td class="score">
+                  {m.status === 'scheduled'
+                    ? <span style="color:rgba(255,255,255,0.25)">vs</span>
+                    : `${m.home_score ?? 0} - ${m.away_score ?? 0}`
+                  }
+                </td>
+                <td class="team-name">{away?.name}</td>
+                <td style="color:rgba(255,255,255,0.35); font-size:0.75rem">
+                  {m.phase === 'group' ? `Grupo ${m.group_id}` : m.phase}
+                </td>
+                <td>
+                  <span class={`badge badge-${m.status}`}>
+                    {m.status === 'live' ? '🔴 Vivo' : m.status === 'finished' ? 'Final' : 'Prog.'}
+                  </span>
+                </td>
+                <td>
+                  <a href={`/admin/matches/${m.id}`} class="edit-btn">Editar</a>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    ) : (
+      <div class="empty-state">No hay partidos programados para hoy</div>
+    )}
+  </div>
+</AdminLayout>

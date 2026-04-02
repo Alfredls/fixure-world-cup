@@ -1,0 +1,249 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '../../../lib/supabase.server';
+
+const user = Astro.locals.user;
+const { id } = Astro.params;
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+);
+
+// Obtener el partido
+const { data: match, error } = await supabase
+  .from('matches')
+  .select(`
+    *,
+    home_team:teams!home_team_id(name, flag_emoji),
+    away_team:teams!away_team_id(name, flag_emoji),
+    venue:venues(name, city)
+  `)
+  .eq('id', id)
+  .single();
+
+if (error || !match) {
+  return Astro.redirect('/admin/matches');
+}
+
+// Procesar resultado del formulario POST
+let successMsg = '';
+let errorMsg = '';
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const homeScoreStr = formData.get('home_score');
+  const awayScoreStr = formData.get('away_score');
+  const statusStr = formData.get('status');
+
+  // VALIDACIÓN: Si no hay SERVICE_ROLE_KEY, el cliente admin no funcionará
+  if (!import.meta.env.SUPABASE_SERVICE_ROLE_KEY) {
+    errorMsg = "ERROR: La clave SUPABASE_SERVICE_ROLE_KEY no está configurada en .env";
+  } else {
+    // 1. Limpiar datos (mantenemos como string para el UPDATE directo)
+    const updateData: Record<string, any> = { 
+      status: statusStr as string 
+    };
+
+    // Solo añadimos los goles si no están vacíos
+    if (homeScoreStr !== '' && homeScoreStr !== null) {
+      updateData.home_score = parseInt(homeScoreStr as string, 10);
+    }
+    if (awayScoreStr !== '' && awayScoreStr !== null) {
+      updateData.away_score = parseInt(awayScoreStr as string, 10);
+    }
+
+    // 2. Ejecutar actualización (PASAMOS EL ID TAL CUAL VIENE DEL PARAMS)
+    const { error: updateError } = await supabaseAdmin
+      .from('matches')
+      .update(updateData)
+      .eq('id', id); // Quitamos el parseInt de aquí
+
+    if (updateError) {
+      errorMsg = `Error de Base de Datos: ${updateError.message}`;
+    } else {
+      // 3. Redirigir para refrescar datos
+      return Astro.redirect(`/admin/matches/${id}?success=1`);
+    }
+  }
+}
+
+// Mostrar mensaje de éxito si viene de la URL
+if (Astro.url.searchParams.get('success')) {
+  successMsg = 'Partido actualizado correctamente';
+}
+
+const home = Array.isArray(match.home_team) ? match.home_team[0] : match.home_team;
+const away = Array.isArray(match.away_team) ? match.away_team[0] : match.away_team;
+const venue = Array.isArray(match.venue) ? match.venue[0] : match.venue;
+---
+
+<AdminLayout title="Editar Partido" user={user}>
+  <style>
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.8rem;
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: white; }
+    .match-header {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      text-align: center;
+    }
+    .team-display { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .team-display .flag { font-size: 2rem; }
+    .team-display .name { font-size: 0.8rem; font-weight: 600; }
+    .vs-score {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      color: #ceab52;
+    }
+    .match-meta {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 0.5rem;
+    }
+    .form-card {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+    .form-title {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 1.25rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+    }
+    .form-group input,
+    .form-group select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.7rem 0.85rem;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus { border-color: #ceab52; }
+    .form-group select option { background: #18181b; }
+    .submit-btn {
+      padding: 0.75rem 2rem;
+      background: #ceab52;
+      color: #111;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .submit-btn:hover { opacity: 0.9; }
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .alert-success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); color: #4ade80; }
+    .alert-error { background: rgba(255,70,70,0.1); border: 1px solid rgba(255,70,70,0.2); color: #ff7070; }
+  </style>
+
+  <a href="/admin/matches" class="back-link">← Volver a partidos</a>
+
+  <!-- Match Preview -->
+  <div class="match-header">
+    <div class="team-display">
+      <span class="flag">{home?.flag_emoji?.includes('.png') ? '🏳️' : home?.name}</span>
+      <span class="name">{home?.name}</span>
+    </div>
+    <div style="text-align:center">
+      <div class="vs-score">
+        {match.status === 'scheduled' 
+          ? 'vs' 
+          : `${match.home_score ?? 0} — ${match.away_score ?? 0}`
+        }
+      </div>
+      <div class="match-meta">{match.match_date} | {match.match_time?.slice(0,5)}</div>
+      <div class="match-meta">{venue?.name}, {venue?.city}</div>
+    </div>
+    <div class="team-display">
+      <span class="flag">{away?.flag_emoji?.includes('.png') ? '🏳️' : away?.name}</span>
+      <span class="name">{away?.name}</span>
+    </div>
+  </div>
+
+  <!-- Edit Form -->
+  <div class="form-card">
+    <p class="form-title">Actualizar Resultado</p>
+
+    {successMsg && <div class="alert alert-success">✅ {successMsg}</div>}
+    {errorMsg && <div class="alert alert-error">❌ {errorMsg}</div>}
+
+    <form method="POST">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Goles {home?.name} (Local)</label>
+          <input
+            type="number"
+            name="home_score"
+            min="0" max="99"
+            value={match.home_score ?? ''}
+            placeholder="0"
+          />
+        </div>
+        <div class="form-group">
+          <label>Goles {away?.name} (Visitante)</label>
+          <input
+            type="number"
+            name="away_score"
+            min="0" max="99"
+            value={match.away_score ?? ''}
+            placeholder="0"
+          />
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1.25rem">
+        <label>Estado del Partido</label>
+        <select name="status">
+          <option value="scheduled" selected={match.status === 'scheduled'}>📅 Programado</option>
+          <option value="live" selected={match.status === 'live'}>🔴 En Vivo</option>
+          <option value="finished" selected={match.status === 'finished'}>✅ Finalizado</option>
+        </select>
+      </div>
+
+      <button type="submit" class="submit-btn">💾 Guardar Cambios</button>
+    </form>
+  </div>
+</AdminLayout>

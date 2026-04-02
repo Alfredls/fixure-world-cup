@@ -1,0 +1,156 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { createClient } from '@supabase/supabase-js';
+
+const user = Astro.locals.user;
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+);
+
+// Obtener todos los grupos con sus posiciones
+const { data: groups } = await supabase
+  .from('groups')
+  .select('id, name')
+  .order('name');
+
+const { data: standings } = await supabase
+  .from('standings')
+  .select(`
+    group_id, played, won, drawn, lost, goals_for, goals_against, goal_diff, points, qualified,
+    team:teams(name, flag_emoji)
+  `)
+  .order('points', { ascending: false })
+  .order('goal_diff', { ascending: false })
+  .order('goals_for', { ascending: false });
+
+// Agrupar standings por grupo
+const standingsByGroup: Record<string, any[]> = {};
+(standings || []).forEach((s: any) => {
+  if (!standingsByGroup[s.group_id]) standingsByGroup[s.group_id] = [];
+  standingsByGroup[s.group_id].push(s);
+});
+---
+
+<AdminLayout title="Posiciones" user={user}>
+  <style>
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 1rem;
+    }
+    .group-card {
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .group-header {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      color: #ceab52;
+    }
+    .standings-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .standings-table th {
+      padding: 0.4rem 0.6rem;
+      text-align: center;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.3);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .standings-table th:first-child { text-align: left; }
+    .standings-table td {
+      padding: 0.45rem 0.6rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.75);
+    }
+    .standings-table td:first-child { text-align: left; }
+    .team-cell { display: flex; align-items: center; gap: 0.4rem; }
+    .team-pos {
+      width: 18px;
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.25);
+    }
+    .team-pos.qualified { color: #4ade80; font-weight: 700; }
+    .pts-cell { font-weight: 700; color: white !important; }
+    .note {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.25);
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 640px) {
+      .groups-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <p class="note">Las posiciones se actualizan automáticamente al marcar un partido como "Finalizado".</p>
+
+  <div class="groups-grid">
+    {(groups || []).map((group: any) => {
+      const groupStandings = standingsByGroup[group.id] || [];
+      return (
+        <div class="group-card">
+          <div class="group-header">GRUPO {group.id}</div>
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th colspan="2">Equipo</th>
+                <th>PJ</th>
+                <th>G</th>
+                <th>E</th>
+                <th>P</th>
+                <th>GF</th>
+                <th>GC</th>
+                <th>DG</th>
+                <th>PTS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupStandings.map((s: any, idx: number) => {
+                const team = Array.isArray(s.team) ? s.team[0] : s.team;
+                const isQualified = idx < 2;
+                return (
+                  <tr>
+                    <td>
+                      <span class={`team-pos ${isQualified ? 'qualified' : ''}`}>
+                        {isQualified ? '✓' : idx + 1}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="team-cell">
+                        <span style="font-size:0.9rem">{team?.name}</span>
+                      </div>
+                    </td>
+                    <td>{s.played}</td>
+                    <td>{s.won}</td>
+                    <td>{s.drawn}</td>
+                    <td>{s.lost}</td>
+                    <td>{s.goals_for}</td>
+                    <td>{s.goals_against}</td>
+                    <td style={s.goal_diff > 0 ? 'color:#4ade80' : s.goal_diff < 0 ? 'color:#f87171' : ''}>
+                      {s.goal_diff > 0 ? '+' : ''}{s.goal_diff}
+                    </td>
+                    <td class="pts-cell">{s.points}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+    })}
+  </div>
+</AdminLayout>

@@ -2,6 +2,7 @@
 import TeamDisplay from './TeamDisplay.astro';
 
 interface LiveMatchData {
+  id?: string | number;
   homeTeam: { name: string; flag: string };
   awayTeam: { name: string; flag: string };
   score: { home: number; away: number };
@@ -182,4 +183,78 @@ const extendedMatches = matches.length > 1 ? [...matches, matches[0]] : matches;
 
   initCarousel();
   document.addEventListener('astro:page-load', initCarousel);
+</script>
+
+<!-- Realtime Scores -->
+<script define:vars={{ supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL, supabaseAnon: import.meta.env.PUBLIC_SUPABASE_ANON_KEY, matchIds: matches.map(m => m.id).filter(Boolean) }}>
+  function initRealtime() {
+    if (!supabaseUrl || !supabaseAnon || !matchIds || matchIds.length === 0) return;
+
+    // Dynamically load Supabase client if available
+    const REALTIME_URL = supabaseUrl.replace('https://', 'wss://') + '/realtime/v1';
+
+    // Use a lightweight manual WebSocket connection for Realtime
+    let ws;
+
+    function connect() {
+      ws = new WebSocket(`${REALTIME_URL}/websocket?apikey=${supabaseAnon}&vsn=1.0.0`);
+
+      ws.onopen = () => {
+        // Join the matches channel
+        ws.send(JSON.stringify({
+          topic: 'realtime:public:matches',
+          event: 'phx_join',
+          payload: {},
+          ref: '1'
+        }));
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.event === 'UPDATE' && msg.payload?.record) {
+            const record = msg.payload.record;
+
+            // Only update if this match is in our hero
+            if (!matchIds.includes(record.id)) return;
+
+            // Update score in DOM
+            const slides = document.querySelectorAll('#carousel-track > div');
+            slides.forEach((slide, idx) => {
+              const matchId = matchIds[idx % matchIds.length];
+              if (matchId === record.id) {
+                const scores = slide.querySelectorAll('span.text-6xl, span.text-\\[8rem\\]');
+                if (scores.length >= 2) {
+                  scores[0].textContent = record.home_score ?? '0';
+                  scores[1].textContent = record.away_score ?? '0';
+                }
+                // Update status pill
+                const pill = slide.querySelector('.border-gold\\/60 span');
+                if (pill && record.status === 'live') {
+                  pill.textContent = '🔴 EN VIVO';
+                } else if (pill && record.status === 'finished') {
+                  pill.textContent = 'FINALIZADO';
+                }
+              }
+            });
+          }
+        } catch (_) {}
+      };
+
+      ws.onclose = () => {
+        // Reconnect after 5s
+        setTimeout(connect, 5000);
+      };
+    }
+
+    connect();
+
+    // Cleanup on page navigation
+    document.addEventListener('astro:before-preparation', () => {
+      ws?.close();
+    });
+  }
+
+  initRealtime();
+  document.addEventListener('astro:page-load', initRealtime);
 </script>
