@@ -84,66 +84,68 @@ const dataMenu = [
 </header>
 
 <script>
-    const header = document.getElementById('main-header');
-    const menuToggle = document.getElementById('menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
+    function setupHeader() {
+        const header = document.getElementById('main-header');
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const line1 = document.getElementById('line-1');
+        const line2 = document.getElementById('line-2');
+        const line3 = document.getElementById('line-3');
 
-    // Scroll effect (Glassmorphism)
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 20) {
-            header?.classList.add('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
-            header?.classList.remove('h-[80px]');
-            header?.classList.add('h-[70px]');
-        } else {
-            header?.classList.remove('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
-            header?.classList.remove('h-[70px]');
-            header?.classList.add('h-[80px]');
-        }
-    });
+        if (!header || !menuToggle || !mobileMenu) return;
 
-    const line1 = document.getElementById('line-1');
-    const line2 = document.getElementById('line-2');
-    const line3 = document.getElementById('line-3');
+        // Scroll effect (Glassmorphism)
+        const handleScroll = () => {
+            if (window.scrollY > 20) {
+                header.classList.add('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
+                header.classList.remove('h-[80px]');
+                header.classList.add('h-[70px]');
+            } else {
+                header.classList.remove('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
+                header.classList.remove('h-[70px]');
+                header.classList.add('h-[80px]');
+            }
+        };
 
-    // Mobile menu toggle
-    menuToggle?.addEventListener('click', () => {
-        const isOpen = mobileMenu?.classList.contains('opacity-100');
-        
-        if (isOpen) {
-            // Close
-            mobileMenu?.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
-            mobileMenu?.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
-            
-            line1?.classList.remove('translate-y-[9px]', 'rotate-45');
-            line2?.classList.remove('opacity-0');
-            line3?.classList.remove('-translate-y-[9px]', '-rotate-45');
-            
-            document.body.style.overflow = '';
-        } else {
-            // Open
-            mobileMenu?.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
-            mobileMenu?.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
-            
-            line1?.classList.add('translate-y-[9px]', 'rotate-45');
-            line2?.classList.add('opacity-0');
-            line3?.classList.add('-translate-y-[9px]', '-rotate-45');
-            
-            document.body.style.overflow = 'hidden';
-        }
-    });
+        window.addEventListener('scroll', handleScroll);
 
-    // Close menu on link click
-    const mobileLinks = mobileMenu?.querySelectorAll('a');
-    mobileLinks?.forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenu?.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
-            mobileMenu?.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        // Mobile menu toggle
+        const toggleMenu = () => {
+            const isOpen = mobileMenu.classList.contains('opacity-100');
             
-            line1?.classList.remove('translate-y-[9px]', 'rotate-45');
-            line2?.classList.remove('opacity-0');
-            line3?.classList.remove('-translate-y-[9px]', '-rotate-45');
-            
-            document.body.style.overflow = '';
+            if (isOpen) {
+                mobileMenu.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                mobileMenu.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+                line1?.classList.remove('translate-y-[9px]', 'rotate-45');
+                line2?.classList.remove('opacity-0');
+                line3?.classList.remove('-translate-y-[9px]', '-rotate-45');
+                document.body.style.overflow = '';
+            } else {
+                mobileMenu.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+                mobileMenu.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                line1?.classList.add('translate-y-[9px]', 'rotate-45');
+                line2?.classList.add('opacity-0');
+                line3?.classList.add('-translate-y-[9px]', '-rotate-45');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        menuToggle.addEventListener('click', toggleMenu);
+
+        // Close menu on link click
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                mobileMenu.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+                line1?.classList.remove('translate-y-[9px]', 'rotate-45');
+                line2?.classList.remove('opacity-0');
+                line3?.classList.remove('-translate-y-[9px]', '-rotate-45');
+                document.body.style.overflow = '';
+            });
         });
-    });
+    }
+
+    // Initialize on first load and on every client-side navigation
+    document.addEventListener('astro:page-load', setupHeader);
 </script>

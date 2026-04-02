@@ -1,5 +1,6 @@
 ---
 import Header from "../components/Header.astro";
+import { ClientRouter } from 'astro:transitions';
 import "../styles/global.css";
 
 interface Props {
@@ -51,6 +52,58 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || "https://pasionmu
     
     <meta name="theme-color" content="#111111" />
 
+    <script>
+      import { isTransitionBeforePreparationEvent } from 'astro:transitions/client';
+
+      // Global Loading Bar Logic
+      let progress = 0;
+      let timer: ReturnType<typeof setInterval>;
+
+      function startLoading() {
+        const bar = document.getElementById('loading-bar');
+        if (!bar) return;
+        
+        document.body.classList.add('loading-bar-active');
+        progress = 10;
+        bar.style.width = `${progress}%`;
+        
+        timer = setInterval(() => {
+          progress += Math.random() * 5;
+          if (progress > 90) progress = 90;
+          bar.style.width = `${progress}%`;
+        }, 200);
+      }
+
+      function finishLoading() {
+        const bar = document.getElementById('loading-bar');
+        if (!bar) return;
+        
+        clearInterval(timer);
+        progress = 100;
+        bar.style.width = '100%';
+        
+        setTimeout(() => {
+          document.body.classList.remove('loading-bar-active');
+          setTimeout(() => {
+            bar.style.width = '0%';
+          }, 300);
+        }, 200);
+      }
+
+      // Astro Navigation Hooks
+      document.addEventListener('astro:before-preparation', () => {
+        startLoading();
+      });
+
+      document.addEventListener('astro:after-preparation', () => {
+        // Preparation is done (HTML loaded), but transition hasn't started
+      });
+
+      document.addEventListener('astro:page-load', () => {
+        finishLoading();
+      });
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -58,8 +111,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || "https://pasionmu
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <ClientRouter />
   </head>
   <body class="bg-[#111] text-white font-inter min-h-screen flex flex-col relative" >
+    <div id="loading-bar-container">
+      <div id="loading-bar"></div>
+    </div>
 
     <Header />
 
