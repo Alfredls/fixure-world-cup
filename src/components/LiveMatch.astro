@@ -234,6 +234,8 @@ const extendedMatches = matches.length > 1 ? [...matches, matches[0]] : matches;
                   pill.textContent = '🔴 EN VIVO';
                 } else if (pill && record.status === 'finished') {
                   pill.textContent = 'FINALIZADO';
+                } else if (pill && record.status === 'scheduled') {
+                  pill.textContent = record.match_time ? record.match_time.slice(0, 5) + ' HRS' : 'PROGRAMADO';
                 }
               }
             });

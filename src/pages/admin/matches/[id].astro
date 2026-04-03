@@ -46,12 +46,18 @@ if (Astro.request.method === 'POST') {
       status: statusStr as string 
     };
 
-    // Solo añadimos los goles si no están vacíos
-    if (homeScoreStr !== '' && homeScoreStr !== null) {
-      updateData.home_score = parseInt(homeScoreStr as string, 10);
-    }
-    if (awayScoreStr !== '' && awayScoreStr !== null) {
-      updateData.away_score = parseInt(awayScoreStr as string, 10);
+    // Si vuelve a programado (scheduled), reseteamos a 0
+    if (statusStr === 'scheduled') {
+      updateData.home_score = 0;
+      updateData.away_score = 0;
+    } else {
+      // Solo añadimos los goles si no están vacíos
+      if (homeScoreStr !== '' && homeScoreStr !== null) {
+        updateData.home_score = parseInt(homeScoreStr as string, 10);
+      }
+      if (awayScoreStr !== '' && awayScoreStr !== null) {
+        updateData.away_score = parseInt(awayScoreStr as string, 10);
+      }
     }
 
     // 2. Ejecutar actualización (PASAMOS EL ID TAL CUAL VIENE DEL PARAMS)

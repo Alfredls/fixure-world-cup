@@ -1,5 +1,6 @@
 ---
-export const prerender = true;
+// Desactivamos el prerender para que se generen datos frescos al cargar (SSR)
+// export const prerender = true;
 
 import Layout from '../../layouts/Layout.astro';
 import StandingsTable from '../../components/StandingsTable.astro';
@@ -17,68 +18,88 @@ export async function getStaticPaths() {
 
 const { id } = Astro.params;
 
-// 1. Obtener datos del grupo de Supabase
-let groupName = `GROUP ${id}`;
+// 1. Obtener datos del grupo de Supabase (Posiciones oficiales)
+let groupName = `GRUPO ${id}`;
 let standings: any[] = [];
 let matches: any[] = [];
 
-const { data: groupData, error: groupError } = await supabase
+// Obtener nombre del grupo
+const { data: groupData } = await supabase
 	.from('groups')
-	.select('*, teams(*)')
+	.select('name')
 	.eq('id', id)
 	.single();
 
-if (!groupError && groupData) {
-    groupName = groupData.name;
-    // Standings mock (se calcularían de los partidos en una app real o vendrían de otra tabla)
-    standings = groupData.teams.map((t: any) => ({
-        team: { name: t.name, flag: t.flag_emoji },
-        played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
-    }));
+if (groupData) groupName = groupData.name;
 
-    // Obtener partidos del grupo
-    const teamIds = groupData.teams.map((t: any) => t.id);
-    const { data: matchesData } = await supabase
-        .from('matches')
-        .select(`
-            *,
-            home_team:teams!home_team_id(name, flag_emoji),
-            away_team:teams!away_team_id(name, flag_emoji),
-            venue:venues(name, city)
-        `)
-        .or(`home_team_id.in.(${teamIds.join(',')}),away_team_id.in.(${teamIds.join(',')})`)
-        .order('match_date', { ascending: true })
-        .order('match_time', { ascending: true });
+// Obtener posiciones reales filtradas por el trigger (solo partidos finalizados afectarán esto)
+const { data: standingsData } = await supabase
+    .from('standings')
+    .select(`
+        played, won, drawn, lost, goals_for, goals_against, goal_diff, points,
+        team_id,
+        team:teams(name, flag_emoji)
+    `)
+    .eq('group_id', id)
+    .order('points', { ascending: false })
+    .order('goal_diff', { ascending: false })
+    .order('goals_for', { ascending: false });
 
-    if (matchesData && matchesData.length > 0) {
-        matches = matchesData.map((m: any) => {
-            const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
-            const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
-            const venueInfo = Array.isArray(m.venue) ? m.venue[0] : m.venue;
-            
-            return {
-                id: m.id,
-                homeTeam: { name: home?.name || 'TBD', flag: home?.flag_emoji || 'unk.png' },
-                awayTeam: { name: away?.name || 'TBD', flag: away?.flag_emoji || 'unk.png' },
-                homeScore: m.home_score,
-                awayScore: m.away_score,
-                date: m.match_date,
-                time: formatMatchTime(m.match_time),
-                venue: venueInfo?.name || 'TBD',
-                city: venueInfo?.city || '',
-                status: m.status
-            };
-        });
-    }
+if (standingsData && standingsData.length > 0) {
+    standings = standingsData.map((s: any) => {
+        const team = Array.isArray(s.team) ? s.team[0] : s.team;
+        return {
+            team: { name: team?.name || 'TBD', flag: team?.flag_emoji || 'unk.png' },
+            played: s.played,
+            won: s.won,
+            drawn: s.drawn,
+            lost: s.lost,
+            gf: s.goals_for,
+            ga: s.goals_against,
+            gd: s.goal_diff,
+            pts: s.points
+        };
+    });
 }
 
-// Fallback si no hay datos en Supabase
+// 2. Obtener todos los partidos del grupo (para el calendario de abajo)
+const { data: matchesData } = await supabase
+    .from('matches')
+    .select(`
+        *,
+        home_team:teams!home_team_id(name, flag_emoji),
+        away_team:teams!away_team_id(name, flag_emoji),
+        venue:venues(name, city)
+    `)
+    .eq('group_id', id)
+    .order('match_date', { ascending: true })
+    .order('match_time', { ascending: true });
+
+if (matchesData && matchesData.length > 0) {
+    matches = matchesData.map((m: any) => {
+        const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
+        const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+        const venueInfo = Array.isArray(m.venue) ? m.venue[0] : m.venue;
+        
+        return {
+            id: m.id,
+            homeTeam: { name: home?.name || 'TBD', flag: home?.flag_emoji || 'unk.png' },
+            awayTeam: { name: away?.name || 'TBD', flag: away?.flag_emoji || 'unk.png' },
+            homeScore: m.home_score,
+            awayScore: m.away_score,
+            date: m.match_date,
+            time: formatMatchTime(m.match_time),
+            venue: venueInfo?.name || 'TBD',
+            city: venueInfo?.city || '',
+            status: m.status
+        };
+    });
+}
+
+// Fallback preventivo si no hay datos
 if (standings.length === 0) {
     standings = [
-        { team: { name: 'México', flag: 'mex.png' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
-        { team: { name: 'Sudáfrica', flag: 'rsa.png' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
-        { team: { name: 'Corea Sur', flag: 'kor.png' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
-        { team: { name: 'UEFA PO D', flag: 'unk.png' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
+        { team: { name: 'Cargando...', flag: 'unk.png' }, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0 },
     ];
 }
 

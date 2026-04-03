@@ -9,18 +9,23 @@ interface Props {
   penalties?: { home: number; away: number };
   time?: string;
   group?: string;
+  status?: string;
 }
 
-const { homeTeam, awayTeam, score, time, group } = Astro.props;
+const { homeTeam, awayTeam, score, time, group, status } = Astro.props;
 
 import { resolveFlag } from '../lib/flags';
 ---
 
 <div class="flex flex-col min-w-[180px] snap-center px-4">
-  <!-- Metadata Row: Time | Group -->
+  <!-- Metadata Row: Status/Time | Group -->
   <div class="flex items-center justify-center gap-2 mb-2 text-gold/90 text-[0.6rem] uppercase tracking-[1px] font-bold">
-    {time && <span>{time}</span>}
-    {time && group && <span class="text-white/20">|</span>}
+    {status === 'finished' ? (
+      <span class="text-green-500 font-black tracking-[2px]">FINALIZADO</span>
+    ) : (
+      time && <span>{time}</span>
+    )}
+    {((status === 'finished') || time) && group && <span class="text-white/20">|</span>}
     {group && <span>{group}</span>}
   </div>
 
