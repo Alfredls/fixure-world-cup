@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { createClient } from '@supabase/supabase-js';
+import Pagination from '../../../components/admin/Pagination.astro';
 
 const user = Astro.locals.user;
 
@@ -13,7 +14,23 @@ const supabase = createClient(
 const phase = Astro.url.searchParams.get('phase') || '';
 const status = Astro.url.searchParams.get('status') || '';
 const dateFilter = Astro.url.searchParams.get('date') || '';
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const pageSize = parseInt(Astro.url.searchParams.get('pageSize') || '10');
+const from = (page - 1) * pageSize;
+const to = from + pageSize - 1;
 
+// Base query for counting
+let countQuery = supabase
+  .from('matches')
+  .select('*', { count: 'exact', head: true });
+
+if (status) countQuery = countQuery.eq('status', status);
+if (phase) countQuery = countQuery.eq('phase', phase);
+if (dateFilter) countQuery = countQuery.eq('match_date', dateFilter);
+
+const { count: totalMatches } = await countQuery;
+
+// Base query for data
 let query = supabase
   .from('matches')
   .select(`
@@ -22,183 +39,117 @@ let query = supabase
     away_team:teams!away_team_id(name, flag_emoji)
   `)
   .order('match_date', { ascending: true })
-  .order('match_time', { ascending: true });
+  .order('match_time', { ascending: true })
+  .range(from, to);
 
 if (status) query = query.eq('status', status);
 if (phase) query = query.eq('phase', phase);
 if (dateFilter) query = query.eq('match_date', dateFilter);
-query = query.limit(50);
 
 const { data: matches } = await query;
 ---
 
 <AdminLayout title="Partidos" user={user}>
-  <style>
-    .filters {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
-      align-items: center;
-    }
-    .filter-select, .filter-input {
-      background: #18181b;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      padding: 0.5rem 0.85rem;
-      color: white;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.8rem;
-      outline: none;
-      cursor: pointer;
-    }
-    .filter-select option { background: #18181b; }
-    .filter-btn {
-      padding: 0.5rem 1rem;
-      background: #ceab52;
-      color: #111;
-      font-family: 'Bebas Neue', cursive;
-      font-size: 0.85rem;
-      letter-spacing: 2px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .matches-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
-    .matches-table th {
-      text-align: left;
-      font-size: 0.58rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.3);
-      padding: 0.5rem 0.75rem;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .matches-table td {
-      padding: 0.65rem 0.75rem;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      color: rgba(255,255,255,0.85);
-    }
-    .match-row:hover td { background: rgba(255,255,255,0.02); }
-    .badge {
-      display: inline-block;
-      padding: 0.18rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.58rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .badge-live { background: rgba(74,222,128,0.15); color: #4ade80; }
-    .badge-scheduled { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); }
-    .badge-finished { background: rgba(206,171,82,0.1); color: #ceab52; }
-    .edit-btn {
-      padding: 0.25rem 0.6rem;
-      background: rgba(206,171,82,0.1);
-      border: 1px solid rgba(206,171,82,0.2);
-      border-radius: 5px;
-      color: #ceab52;
-      font-size: 0.7rem;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .edit-btn:hover { background: rgba(206,171,82,0.2); }
-    .score-col {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 1rem;
-      letter-spacing: 1px;
-      text-align: center;
-    }
-    .card-wrapper {
-      background: #18181b;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .results-count {
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.3);
-      align-self: center;
-    }
-  </style>
-
   <!-- Filters -->
   <form method="GET" class="filters">
-    <select name="status" class="filter-select">
-      <option value="" selected={!status}>Todos los estados</option>
-      <option value="scheduled" selected={status === 'scheduled'}>📅 Programados</option>
-      <option value="live" selected={status === 'live'}>🔴 En Vivo</option>
-      <option value="finished" selected={status === 'finished'}>✅ Finalizados</option>
-    </select>
+    <div class="relative flex items-center">
+      <select name="status" class="filter-select !pl-10">
+        <option value="" selected={!status}>Todos los estados</option>
+        <option value="scheduled" selected={status === 'scheduled'}>Programados</option>
+        <option value="live" selected={status === 'live'}>En Vivo</option>
+        <option value="finished" selected={status === 'finished'}>Finalizados</option>
+      </select>
+      <div class="absolute left-3 pointer-events-none opacity-40">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+    </div>
 
-    <select name="phase" class="filter-select">
-      <option value="" selected={!phase}>Todas las fases</option>
-      <option value="group" selected={phase === 'group'}>Grupos</option>
-      <option value="Dieciseisavos de Final" selected={phase === 'Dieciseisavos de Final'}>R32</option>
-      <option value="Octavos de Final" selected={phase === 'Octavos de Final'}>R16</option>
-      <option value="Cuartos de Final" selected={phase === 'Cuartos de Final'}>Cuartos</option>
-      <option value="Semifinales" selected={phase === 'Semifinales'}>Semis</option>
-      <option value="Final" selected={phase === 'Final'}>Final</option>
-    </select>
+    <div class="relative flex items-center">
+      <select name="phase" class="filter-select !pl-10">
+        <option value="" selected={!phase}>Todas las fases</option>
+        <option value="group" selected={phase === 'group'}>Grupos</option>
+        <option value="Dieciseisavos de Final" selected={phase === 'Dieciseisavos de Final'}>R32</option>
+        <option value="Octavos de Final" selected={phase === 'Octavos de Final'}>R16</option>
+        <option value="Cuartos de Final" selected={phase === 'Cuartos de Final'}>Cuartos</option>
+        <option value="Semifinales" selected={phase === 'Semifinales'}>Semis</option>
+        <option value="Final" selected={phase === 'Final'}>Final</option>
+      </select>
+      <div class="absolute left-3 pointer-events-none opacity-40">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+      </div>
+    </div>
 
     <input type="date" name="date" class="filter-input" value={dateFilter} />
 
-    <button type="submit" class="filter-btn">Filtrar</button>
-    <span class="results-count">{matches?.length ?? 0} resultados</span>
+    <button type="submit" class="filter-btn flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filtrar
+    </button>
   </form>
 
   <!-- Table -->
   <div class="card-wrapper">
-    <table class="matches-table">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Local</th>
-          <th>Marcador</th>
-          <th>Visitante</th>
-          <th>Fase</th>
-          <th>Estado</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {matches?.map((m: any) => {
-          const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
-          const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
-          return (
-            <tr class="match-row">
-              <td style="color:rgba(255,255,255,0.4);font-size:0.75rem">{m.match_date}</td>
-              <td style="color:rgba(255,255,255,0.4);font-size:0.75rem">{m.match_time?.slice(0,5)}</td>
-              <td>{home?.name}</td>
-              <td class="score-col">
-                {m.status === 'scheduled'
-                  ? <span style="color:rgba(255,255,255,0.2)">-</span>
-                  : `${m.home_score ?? 0} - ${m.away_score ?? 0}`
-                }
-              </td>
-              <td>{away?.name}</td>
-              <td style="color:rgba(255,255,255,0.35);font-size:0.72rem">
-                {m.phase === 'group' ? `Gr. ${m.group_id}` : m.phase}
-              </td>
-              <td>
-                <span class={`badge badge-${m.status}`}>
-                  {m.status === 'live' ? '🔴 Vivo' : m.status === 'finished' ? 'Final' : 'Prog.'}
-                </span>
-              </td>
-              <td>
-                <a href={`/admin/matches/${m.id}`} class="edit-btn">Editar</a>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="matches-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Local</th>
+            <th>Marcador</th>
+            <th>Visitante</th>
+            <th>Fase</th>
+            <th>Estado</th>
+            <th class="w-20"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {matches?.map((m: any) => {
+            const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
+            const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+            return (
+              <tr class="match-row">
+                <td class="text-white/40">{m.match_date}</td>
+                <td class="text-white/40">{m.match_time?.slice(0,5)}</td>
+                <td class="font-medium text-white">{home?.name}</td>
+                <td class="score-col font-bebas text-lg">
+                  {m.status === 'scheduled'
+                    ? <span class="text-white/20">-</span>
+                    : `${m.home_score ?? 0} - ${m.away_score ?? 0}`
+                  }
+                </td>
+                <td class="font-medium text-white">{away?.name}</td>
+                <td class="text-white/40">
+                  {m.phase === 'group' ? `Gr. ${m.group_id}` : m.phase}
+                </td>
+                <td>
+                  <span class={`badge badge-${m.status} flex items-center gap-1.5 w-fit`}>
+                    {m.status === 'live' && (
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                    )}
+                    {m.status === 'finished' && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    )}
+                    {m.status === 'scheduled' && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                    )}
+                    {m.status === 'live' ? 'En Vivo' : m.status === 'finished' ? 'Final' : 'Prog.'}
+                  </span>
+                </td>
+                <td>
+                  <a href={`/admin/matches/${m.id}`} class="text-gold opacity-60 hover:opacity-100 font-medium transition-all">Editar</a>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+    
+    <Pagination 
+      totalItems={totalMatches || 0} 
+      pageSize={pageSize} 
+      currentPage={page} 
+    />
   </div>
 </AdminLayout>

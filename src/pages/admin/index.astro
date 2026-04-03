@@ -9,7 +9,6 @@ const supabase = createClient(
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
 );
 
-// Obtener estadísticas de partidos
 const today = new Date().toISOString().split('T')[0];
 
 const [{ count: totalMatches }, { count: liveMatches }, { count: finishedMatches }, { data: todayMatches }] = await Promise.all([
@@ -28,178 +27,112 @@ const scheduledMatches = (totalMatches || 0) - (finishedMatches || 0) - (liveMat
 ---
 
 <AdminLayout title="Dashboard" user={user}>
-  <style>
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .stat-card {
-      background: #18181b;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-    }
-    .stat-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.4);
-      margin-bottom: 0.5rem;
-    }
-    .stat-value {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 2.4rem;
-      letter-spacing: 2px;
-      line-height: 1;
-    }
-    .stat-card.live .stat-value { color: #4ade80; }
-    .stat-card.gold .stat-value { color: #ceab52; }
-    .section-title {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 1.1rem;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 0.75rem;
-      margin-top: 1.5rem;
-      text-transform: uppercase;
-    }
-    .matches-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-    .matches-table th {
-      text-align: left;
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.35);
-      padding: 0.5rem 0.75rem;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .matches-table td {
-      padding: 0.7rem 0.75rem;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      vertical-align: middle;
-    }
-    .match-row:hover { background: rgba(255,255,255,0.03); }
-    .team-name { font-weight: 500; }
-    .score {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 1.1rem;
-      letter-spacing: 1px;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .badge {
-      display: inline-block;
-      padding: 0.2rem 0.55rem;
-      border-radius: 5px;
-      font-size: 0.6rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .badge-live { background: rgba(74,222,128,0.15); color: #4ade80; }
-    .badge-scheduled { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); }
-    .badge-finished { background: rgba(206,171,82,0.1); color: #ceab52; }
-    .edit-btn {
-      padding: 0.3rem 0.7rem;
-      background: rgba(206,171,82,0.1);
-      border: 1px solid rgba(206,171,82,0.2);
-      border-radius: 6px;
-      color: #ceab52;
-      font-size: 0.72rem;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.15s;
-    }
-    .edit-btn:hover { background: rgba(206,171,82,0.2); }
-    .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: rgba(255,255,255,0.25);
-      font-size: 0.85rem;
-    }
-    .card-wrapper {
-      background: #18181b;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-  </style>
-
   <!-- Stats Cards -->
   <div class="stats-grid">
     <div class="stat-card live">
-      <div class="stat-label">🔴 En Vivo</div>
-      <div class="stat-value">{liveMatches ?? 0}</div>
+      <div class="stat-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg>
+        En Vivo
+      </div>
+      <div class="stat-value font-bebas">{liveMatches ?? 0}</div>
+      <div class="stat-icon-bg">LIVE</div>
     </div>
+    
     <div class="stat-card gold">
-      <div class="stat-label">⚽ Total Partidos</div>
-      <div class="stat-value">{totalMatches ?? 0}</div>
+      <div class="stat-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 11.5 1.5 1.5-1.5 1.5"/><path d="M16 12h-4"/></svg>
+        Total Partidos
+      </div>
+      <div class="stat-value font-bebas">{totalMatches ?? 0}</div>
+      <div class="stat-icon-bg">ALL</div>
     </div>
+    
     <div class="stat-card">
-      <div class="stat-label">✅ Finalizados</div>
-      <div class="stat-value">{finishedMatches ?? 0}</div>
+      <div class="stat-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+        Finalizados
+      </div>
+      <div class="stat-value font-bebas">{finishedMatches ?? 0}</div>
+      <div class="stat-icon-bg">FIN</div>
     </div>
+    
     <div class="stat-card">
-      <div class="stat-label">📅 Por Jugar</div>
-      <div class="stat-value">{scheduledMatches}</div>
+      <div class="stat-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+        Por Jugar
+      </div>
+      <div class="stat-value font-bebas">{scheduledMatches}</div>
+      <div class="stat-icon-bg">CAL</div>
     </div>
   </div>
 
   <!-- Today's Matches -->
-  <p class="section-title">Partidos de Hoy — {today}</p>
+  <div class="flex items-center gap-3 mb-4">
+    <div class="w-1.5 h-1.5 rounded-full bg-gold"></div>
+    <span class="font-bebas text-lg tracking-[0.15em] text-white/60">PARTIDOS DE HOY</span>
+    <span class="text-[0.65rem] text-white/20 font-medium ml-auto">{today}</span>
+  </div>
+  
   <div class="card-wrapper">
     {todayMatches && todayMatches.length > 0 ? (
-      <table class="matches-table">
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th>Local</th>
-            <th>Marcador</th>
-            <th>Visitante</th>
-            <th>Fase</th>
-            <th>Estado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {todayMatches.map((m: any) => {
-            const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
-            const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
-            return (
-              <tr class="match-row">
-                <td style="color:rgba(255,255,255,0.45); font-size:0.8rem">{m.match_time?.slice(0,5)}</td>
-                <td class="team-name">{home?.name}</td>
-                <td class="score">
-                  {m.status === 'scheduled'
-                    ? <span style="color:rgba(255,255,255,0.25)">vs</span>
-                    : `${m.home_score ?? 0} - ${m.away_score ?? 0}`
-                  }
-                </td>
-                <td class="team-name">{away?.name}</td>
-                <td style="color:rgba(255,255,255,0.35); font-size:0.75rem">
-                  {m.phase === 'group' ? `Grupo ${m.group_id}` : m.phase}
-                </td>
-                <td>
-                  <span class={`badge badge-${m.status}`}>
-                    {m.status === 'live' ? '🔴 Vivo' : m.status === 'finished' ? 'Final' : 'Prog.'}
-                  </span>
-                </td>
-                <td>
-                  <a href={`/admin/matches/${m.id}`} class="edit-btn">Editar</a>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="matches-table">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Local</th>
+              <th>Marcador</th>
+              <th>Visitante</th>
+              <th>Fase</th>
+              <th>Estado</th>
+              <th class="w-20"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {todayMatches.map((m: any) => {
+              const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
+              const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
+              return (
+                <tr class="match-row">
+                  <td class="text-white/40">{m.match_time?.slice(0,5)}</td>
+                  <td class="font-medium text-white">{home?.name}</td>
+                  <td class="score-col font-bebas text-lg">
+                    {m.status === 'scheduled'
+                      ? <span class="text-white/25">vs</span>
+                      : `${m.home_score ?? 0} - ${m.away_score ?? 0}`
+                    }
+                  </td>
+                  <td class="font-medium text-white">{away?.name}</td>
+                  <td class="text-white/40">
+                    {m.phase === 'group' ? `Grupo ${m.group_id}` : m.phase}
+                  </td>
+                  <td>
+                    <span class={`badge badge-${m.status} flex items-center gap-1.5 w-fit`}>
+                      {m.status === 'live' && (
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                      )}
+                      {m.status === 'finished' && (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
+                      {m.status === 'scheduled' && (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                      )}
+                      {m.status === 'live' ? 'En Vivo' : m.status === 'finished' ? 'Final' : 'Prog.'}
+                    </span>
+                  </td>
+                  <td>
+                    <a href={`/admin/matches/${m.id}`} class="text-gold opacity-60 hover:opacity-100 font-medium transition-all">Editar</a>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     ) : (
-      <div class="empty-state">No hay partidos programados para hoy</div>
+      <div class="p-16 text-center text-sm text-white/20 italic tracking-widest bg-white/[0.01]">
+        NO HAY PARTIDOS PROGRAMADOS PARA EL DÍA DE HOY
+      </div>
     )}
   </div>
 </AdminLayout>

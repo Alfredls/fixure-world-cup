@@ -1,0 +1,97 @@
+---
+interface Props {
+  totalItems: number;
+  pageSize: number;
+  currentPage: number;
+}
+
+const { totalItems, pageSize, currentPage } = Astro.props;
+const totalPages = Math.ceil(totalItems / pageSize);
+
+const getUrlFor = (p: number, ps?: number) => {
+  const url = new URL(Astro.request.url);
+  url.searchParams.set('page', p.toString());
+  if (ps) {
+    url.searchParams.set('pageSize', ps.toString());
+    if (ps !== pageSize) url.searchParams.set('page', '1');
+  }
+  return url.search;
+};
+
+const pages = [];
+const visiblePages = 5;
+let startPage = Math.max(1, currentPage - Math.floor(visiblePages / 2));
+let endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+if (endPage - startPage < visiblePages - 1) {
+  startPage = Math.max(1, endPage - visiblePages + 1);
+}
+
+for (let i = startPage; i <= endPage; i++) {
+  pages.push(i);
+}
+
+const pageSizes = [10, 20, 30, 40, 50];
+---
+
+<div class="pagination-container rounded-b-xl">
+  <div class="flex items-center gap-6">
+    <span class="results-info">
+      Mostrando <strong>{Math.min(pageSize * (currentPage - 1) + 1, totalItems)}-{Math.min(pageSize * currentPage, totalItems)}</strong> de <strong>{totalItems}</strong>
+    </span>
+    
+    <div class="page-size-selector">
+      <label for="pageSize">Ver:</label>
+      <select id="pageSize" onchange="window.location.search = this.value" class="cursor-pointer">
+        {pageSizes.map(size => (
+          <option value={getUrlFor(1, size)} selected={size === pageSize}>
+            {size}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1">
+      <a 
+        href={getUrlFor(currentPage - 1)} 
+        class={`page-link transition-all ${currentPage <= 1 ? 'disabled' : ''}`}
+        title="Anterior"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </a>
+
+      {startPage > 1 && (
+        <>
+          <a href={getUrlFor(1)} class="page-link transition-all">1</a>
+          <span class="text-white/20 px-1 text-xs">...</span>
+        </>
+      )}
+
+      {pages.map(p => (
+        <a 
+          href={getUrlFor(p)} 
+          class={`page-link transition-all ${p === currentPage ? 'active' : ''}`}
+        >
+          {p}
+        </a>
+      ))}
+
+      {endPage < totalPages && (
+        <>
+          <span class="text-white/20 px-1 text-xs">...</span>
+          <a href={getUrlFor(totalPages)} class="page-link transition-all">{totalPages}</a>
+        </>
+      )}
+
+      <a 
+        href={getUrlFor(currentPage + 1)} 
+        class={`page-link transition-all ${currentPage >= totalPages ? 'disabled' : ''}`}
+        title="Siguiente"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-9-6"/></svg>
+      </a>
+    </div>
+  </div>
+</div>

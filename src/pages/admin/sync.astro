@@ -5,120 +5,80 @@ const user = Astro.locals.user;
 ---
 
 <AdminLayout title="Sincronizar API" user={user}>
+  <div class="sync-card">
+    <div class="sync-header-box">
+      <div class="sync-icon-main">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+      </div>
+      <div>
+        <h2 class="sync-title">Sincronización de Resultados</h2>
+        <p class="text-[0.65rem] text-white/20 uppercase tracking-[0.2em] font-bold">Actualización en tiempo real desde API de Fútbol</p>
+      </div>
+    </div>
+
+    <p class="sync-desc">
+      Este proceso actualizará los goles y estados de los partidos programados para la fecha actual. 
+      Utiliza el servicio de <strong>Football-Data.org</strong> para centralizar la información oficial del torneo.
+    </p>
+
+    <button id="sync-btn" class="sync-btn">
+      <div class="spinner hidden" id="spin"></div>
+      <svg id="btn-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span id="btn-text">INICIAR PROCESO DE SINCRONIZACIÓN</span>
+    </button>
+
+    <div class="sync-log" id="sync-log"></div>
+
+    <div class="api-info-grid">
+      <div class="api-info-item">
+        <span class="api-info-label">Fuente de datos</span>
+        <span class="api-info-val">football-data.org</span>
+      </div>
+      <div class="api-info-item">
+        <span class="api-info-label">Torneo</span>
+        <span class="api-info-val">FIFA World Cup 2026</span>
+      </div>
+      <div class="api-info-item">
+        <span class="api-info-label">Límite API</span>
+        <span class="api-info-val">10 req/min (Standard)</span>
+      </div>
+      <div class="api-info-item">
+        <span class="api-info-label">Último proceso</span>
+        <span class="api-info-val" id="last-sync">Pendiente</span>
+      </div>
+    </div>
+  </div>
+
   <style>
-    .sync-card {
-      background: #18181b;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 16px;
-      padding: 2rem;
-      max-width: 600px;
-    }
-    .sync-title {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 1.3rem;
-      letter-spacing: 3px;
-      color: white;
-      margin-bottom: 0.5rem;
-    }
-    .sync-desc {
-      font-size: 0.82rem;
-      color: rgba(255,255,255,0.4);
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-    .sync-btn {
-      padding: 0.8rem 1.5rem;
-      background: #ceab52;
-      color: #111;
-      font-family: 'Bebas Neue', cursive;
-      font-size: 1rem;
-      letter-spacing: 2px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .sync-btn:hover { opacity: 0.9; }
-    .sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .spinner {
-      display: none;
       width: 16px; height: 16px;
-      border: 2px solid rgba(17,17,17,0.3);
+      border: 3px solid rgba(0,0,0,0.1);
       border-top-color: #111;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .sync-log {
-      margin-top: 1.5rem;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 8px;
-      padding: 1rem;
-      font-family: 'Courier New', monospace;
-      font-size: 0.75rem;
-      color: #4ade80;
-      min-height: 100px;
-      max-height: 300px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      display: none;
-    }
-    .sync-log.visible { display: block; }
-    .divider {
-      border: none;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      margin: 1.5rem 0;
-    }
-    .api-info {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.3);
-      line-height: 1.7;
-    }
-    .api-info strong { color: rgba(255,255,255,0.55); }
+    .hidden { display: none; }
   </style>
-
-  <div class="sync-card">
-    <h2 class="sync-title">🔄 Sincronización de Resultados</h2>
-    <p class="sync-desc">
-      Presiona el botón para actualizar los resultados del día actual desde la API de fútbol.
-      Solo afecta partidos en estado "En Vivo" o "Programado" para la fecha de hoy.
-    </p>
-
-    <button id="sync-btn" class="sync-btn">
-      <div class="spinner" id="spin"></div>
-      <span id="btn-text">⚡ Sincronizar Ahora</span>
-    </button>
-
-    <div class="sync-log" id="sync-log"></div>
-
-    <hr class="divider" />
-
-    <div class="api-info">
-      <p><strong>Fuente de datos:</strong> API de Football (football-data.org)</p>
-      <p><strong>Torneo:</strong> FIFA World Cup 2026</p>
-      <p><strong>Límite gratuito:</strong> 10 req/min (suficiente para actualizaciones manuales)</p>
-      <p><strong>Última sincronización:</strong> <span id="last-sync">Nunca</span></p>
-    </div>
-  </div>
 
   <script define:vars={{ supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL, supabaseAnon: import.meta.env.PUBLIC_SUPABASE_ANON_KEY }}>
     const btn = document.getElementById('sync-btn');
     const spin = document.getElementById('spin');
+    const btnIcon = document.getElementById('btn-icon');
     const btnText = document.getElementById('btn-text');
     const log = document.getElementById('sync-log');
     const lastSync = document.getElementById('last-sync');
 
     function appendLog(msg, color = '#4ade80') {
       const time = new Date().toLocaleTimeString('es');
-      log.textContent += `[${time}] ${msg}\n`;
+      const line = document.createElement('div');
+      line.style.color = color;
+      line.style.marginBottom = '2px';
+      line.textContent = `[${time}] ${msg}`;
+      log.appendChild(line);
       log.scrollTop = log.scrollHeight;
     }
 
-    // Get access token from cookie
     function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
       return match ? match[2] : null;
@@ -126,12 +86,13 @@ const user = Astro.locals.user;
 
     btn.addEventListener('click', async () => {
       btn.disabled = true;
-      spin.style.display = 'block';
-      btnText.textContent = 'Sincronizando...';
+      spin.classList.remove('hidden');
+      btnIcon.classList.add('hidden');
+      btnText.textContent = 'PROCESANDO DATOS...';
       log.classList.add('visible');
       log.textContent = '';
 
-      appendLog('Iniciando sincronización...');
+      appendLog('> Conectando con servidor de sincronización...');
 
       try {
         const token = getCookie('sb-access-token');
@@ -146,21 +107,23 @@ const user = Astro.locals.user;
         const data = await res.json();
 
         if (!res.ok) {
-          appendLog(`ERROR: ${data.error || 'Error desconocido'}`, '#f87171');
+          appendLog(`! ERROR CRÍTICO: ${data.error || 'Fallo en la respuesta del servidor'}`, '#f87171');
         } else {
-          appendLog(`✅ Sincronización completada`);
-          appendLog(`   Partidos actualizados: ${data.updated ?? 0}`);
-          appendLog(`   Partidos en vivo: ${data.live ?? 0}`);
-          if (data.message) appendLog(`   Nota: ${data.message}`);
+          appendLog(`✓ Respuesta recibida correctamente`);
+          appendLog(`✓ Partidos actualizados: ${data.updated ?? 0}`);
+          appendLog(`✓ Partidos detectados en vivo: ${data.live ?? 0}`);
+          if (data.message) appendLog(`i Mensaje: ${data.message}`, '#ceab52');
+          appendLog(`> Sincronización completada con éxito`);
           lastSync.textContent = new Date().toLocaleString('es');
         }
       } catch (err) {
-        appendLog(`ERROR de red: ${err.message}`, '#f87171');
+        appendLog(`! ERROR DE RED: ${err.message}`, '#f87171');
       }
 
       btn.disabled = false;
-      spin.style.display = 'none';
-      btnText.textContent = '⚡ Sincronizar Ahora';
+      spin.classList.add('hidden');
+      btnIcon.classList.remove('hidden');
+      btnText.textContent = 'INICIAR PROCESO DE SINCRONIZACIÓN';
     });
   </script>
 </AdminLayout>

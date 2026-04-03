@@ -34,86 +34,34 @@ const standingsByGroup: Record<string, any[]> = {};
 ---
 
 <AdminLayout title="Posiciones" user={user}>
-  <style>
-    .groups-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
-      gap: 1rem;
-    }
-    .group-card {
-      background: #18181b;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .group-header {
-      padding: 0.75rem 1rem;
-      background: rgba(255,255,255,0.03);
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      font-family: 'Bebas Neue', cursive;
-      font-size: 0.9rem;
-      letter-spacing: 3px;
-      color: #ceab52;
-    }
-    .standings-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-    }
-    .standings-table th {
-      padding: 0.4rem 0.6rem;
-      text-align: center;
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.3);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .standings-table th:first-child { text-align: left; }
-    .standings-table td {
-      padding: 0.45rem 0.6rem;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      color: rgba(255,255,255,0.75);
-    }
-    .standings-table td:first-child { text-align: left; }
-    .team-cell { display: flex; align-items: center; gap: 0.4rem; }
-    .team-pos {
-      width: 18px;
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.25);
-    }
-    .team-pos.qualified { color: #4ade80; font-weight: 700; }
-    .pts-cell { font-weight: 700; color: white !important; }
-    .note {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.25);
-      margin-top: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-    @media (max-width: 640px) {
-      .groups-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-
-  <p class="note">Las posiciones se actualizan automáticamente al marcar un partido como "Finalizado".</p>
+  <div class="flex items-center gap-4 mb-8 bg-white/5 border border-white/10 p-4 rounded-xl">
+    <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div>
+      <h2 class="text-sm font-bold text-white mb-0.5 tracking-tight">Cálculo de Posiciones</h2>
+      <p class="text-[0.65rem] text-white/40 uppercase tracking-widest font-medium">Actualización automática al finalizar partidos</p>
+    </div>
+  </div>
 
   <div class="groups-grid">
     {(groups || []).map((group: any) => {
       const groupStandings = standingsByGroup[group.id] || [];
       return (
         <div class="group-card">
-          <div class="group-header">GRUPO {group.id}</div>
+          <div class="group-header">
+            <span>GRUPO {group.id}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-30"><path d="M6 9H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/><rect width="14" height="14" x="8" y="2" rx="2"/><path d="M18 9v2"/><path d="M14 9v2"/><path d="M10 9v2"/></svg>
+          </div>
           <table class="standings-table">
             <thead>
               <tr>
-                <th colspan="2">Equipo</th>
+                <th class="w-10"></th>
+                <th class="text-left pl-4">Equipo</th>
                 <th>PJ</th>
                 <th>G</th>
                 <th>E</th>
                 <th>P</th>
-                <th>GF</th>
-                <th>GC</th>
                 <th>DG</th>
                 <th>PTS</th>
               </tr>
@@ -125,25 +73,23 @@ const standingsByGroup: Record<string, any[]> = {};
                 return (
                   <tr>
                     <td>
-                      <span class={`team-pos ${isQualified ? 'qualified' : ''}`}>
-                        {isQualified ? '✓' : idx + 1}
+                      <span class={`pos-badge ${isQualified ? 'qualified' : ''}`}>
+                        {isQualified ? (
+                           <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        ) : idx + 1}
                       </span>
                     </td>
-                    <td>
-                      <div class="team-cell">
-                        <span style="font-size:0.9rem">{team?.name}</span>
-                      </div>
+                    <td class="team-cell-full">
+                      <span class="font-medium text-white/90">{team?.name}</span>
                     </td>
                     <td>{s.played}</td>
                     <td>{s.won}</td>
                     <td>{s.drawn}</td>
                     <td>{s.lost}</td>
-                    <td>{s.goals_for}</td>
-                    <td>{s.goals_against}</td>
-                    <td style={s.goal_diff > 0 ? 'color:#4ade80' : s.goal_diff < 0 ? 'color:#f87171' : ''}>
+                    <td class={s.goal_diff > 0 ? 'text-green-400/80 font-bold' : s.goal_diff < 0 ? 'text-red-400/80' : 'opacity-40'}>
                       {s.goal_diff > 0 ? '+' : ''}{s.goal_diff}
                     </td>
-                    <td class="pts-cell">{s.points}</td>
+                    <td class="pts-bold font-bebas text-lg tracking-wider">{s.points}</td>
                   </tr>
                 );
               })}
