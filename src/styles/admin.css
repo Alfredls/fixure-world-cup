@@ -594,6 +594,33 @@ body {
   .admin-main { margin-left: 0; }
   .mobile-menu-btn { display: flex; }
   .sidebar-overlay.visible { display: block; }
+
+  /* Status grid — de 3 columnas a 1 en mobile */
+  .status-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+
+  /* Groups grid — evitar overflow en tablets pequeñas */
+  .groups-grid { grid-template-columns: 1fr; }
+
+  /* Sync card — padding reducido */
+  .sync-card { padding: 1.5rem; }
+
+  /* API info — de 2 columnas a 1 */
+  .api-info-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+@media (max-width: 480px) {
+  /* Stat cards — siempre 1 col en pantallas XS */
+  .stats-grid { grid-template-columns: 1fr; }
+
+  /* Sync card — padding mínimo */
+  .sync-card { padding: 1.25rem; }
+
+  /* Match header — cambiar dirección vertical en XS */
+  .match-header { flex-direction: column; gap: 1rem; }
+
+  /* Score controls — tamaño reducido */
+  .score-btn { width: 44px; height: 44px; }
+  .score-input { width: 70px !important; font-size: 2rem !important; }
 }
 
 /* ── Match Editing Specifics ── */

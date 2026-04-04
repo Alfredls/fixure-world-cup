@@ -14,7 +14,9 @@ if (accessToken) {
   }
 }
 
-const nextUrl = Astro.url.searchParams.get('next') || '/admin';
+// Validar que nextUrl sea una ruta interna (previene open redirect)
+const rawNext = Astro.url.searchParams.get('next') || '/admin';
+const nextUrl = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/admin';
 const errorParam = Astro.url.searchParams.get('error');
 ---
 
@@ -214,12 +216,7 @@ const errorParam = Astro.url.searchParams.get('error');
       <a href="/" class="back-link">← Volver al sitio</a>
     </div>
 
-    <script define:vars={{ nextUrl }}>
-      const SUPABASE_URL = import.meta.env?.PUBLIC_SUPABASE_URL
-        || document.querySelector('meta[name="supa-url"]')?.content;
-      const SUPABASE_ANON = import.meta.env?.PUBLIC_SUPABASE_ANON_KEY
-        || document.querySelector('meta[name="supa-anon"]')?.content;
-    </script>
+
 
     <script define:vars={{ supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL, supabaseAnon: import.meta.env.PUBLIC_SUPABASE_ANON_KEY, nextUrl }}>
       const form = document.getElementById('login-form');
@@ -269,8 +266,8 @@ const errorParam = Astro.url.searchParams.get('error');
 
           // Guardar tokens en cookies (7 días)
           const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
-          document.cookie = `sb-access-token=${data.access_token}; path=/; expires=${expires}; SameSite=Strict`;
-          document.cookie = `sb-refresh-token=${data.refresh_token}; path=/; expires=${expires}; SameSite=Strict`;
+          document.cookie = `sb-access-token=${data.access_token}; path=/; expires=${expires}; SameSite=Strict; Secure`;
+          document.cookie = `sb-refresh-token=${data.refresh_token}; path=/; expires=${expires}; SameSite=Strict; Secure`;
 
           window.location.href = nextUrl;
         } catch (err) {

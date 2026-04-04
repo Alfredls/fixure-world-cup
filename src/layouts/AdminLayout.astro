@@ -1,5 +1,6 @@
 ---
 import '../styles/admin.css';
+import Toast from '../components/Toast.astro';
 
 interface Props {
   title: string;
@@ -83,6 +84,7 @@ const pathname = new URL(Astro.request.url).pathname;
           <span class="page-title">{title}</span>
         </div>
         <div class="admin-content">
+          <Toast />
           <slot />
         </div>
       </div>

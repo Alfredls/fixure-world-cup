@@ -1,5 +1,6 @@
 ---
 import Header from "../components/Header.astro";
+import Toast from "../components/Toast.astro";
 import { ClientRouter } from 'astro:transitions';
 import "../styles/global.css";
 
@@ -120,6 +121,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || "https://pasionmu
     </div>
 
     <Header />
+    <Toast />
 
     <main class:list={[
       "flex-1 w-full flex flex-col relative z-20",

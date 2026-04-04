@@ -17,20 +17,27 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const supabase = createClient(
+  // Client anon — solo para verificar la sesión del usuario
+  const supabaseAuth = createClient(
     import.meta.env.PUBLIC_SUPABASE_URL,
     import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
     { global: { headers: { Authorization: `Bearer ${token}` } } }
   );
 
   // Verify user session
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
   if (authError || !user) {
     return new Response(JSON.stringify({ error: 'Sesión inválida' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Client service role — para operaciones de lectura/escritura en DB (bypassa RLS)
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+  );
 
   const today = new Date().toISOString().split('T')[0];
   let updated = 0;

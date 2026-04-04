@@ -1,0 +1,22 @@
+---
+import { createClient } from '@supabase/supabase-js';
+
+// Detectar sesión admin y redirigir inmediatamente sin mostrar la página
+const accessToken = Astro.cookies.get('sb-access-token')?.value;
+let redirectTo = '/?notif=not-found';
+
+if (accessToken) {
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  );
+  const { data: { user } } = await supabase.auth.getUser(accessToken);
+  const adminEmail = import.meta.env.ADMIN_EMAIL;
+
+  if (user && (!adminEmail || user.email === adminEmail)) {
+    redirectTo = '/admin?notif=not-found';
+  }
+}
+
+return Astro.redirect(redirectTo, 302);
+---

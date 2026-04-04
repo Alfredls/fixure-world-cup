@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;700;900&display=swap');
+/* Google Fonts are loaded via <link> in Layout.astro and AdminLayout.astro */
 @import "tailwindcss";
 
 @theme {
