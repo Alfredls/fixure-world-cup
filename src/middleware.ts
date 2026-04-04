@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 const ADMIN_EMAIL = import.meta.env.ADMIN_EMAIL;
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const { request, url, redirect, cookies } = context;
+  const { url, redirect, cookies } = context;
   const pathname = url.pathname;
 
   // Solo proteger rutas bajo /admin
@@ -12,12 +12,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  // Intentar obtener la sesión desde las cookies
+  // Sin sesión → inicio (no se revela que existe un panel admin)
   const accessToken = cookies.get('sb-access-token')?.value;
-  const refreshToken = cookies.get('sb-refresh-token')?.value;
-
   if (!accessToken) {
-    return redirect('/login?next=' + encodeURIComponent(pathname));
+    return redirect('/');
   }
 
   try {
@@ -28,20 +26,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     const { data: { user }, error } = await supabase.auth.getUser(accessToken);
 
+    // Token inválido o expirado → inicio
     if (error || !user) {
-      return redirect('/login?next=' + encodeURIComponent(pathname));
+      return redirect('/');
     }
 
-    // Verificar que sea el email admin correcto
+    // Email no coincide con el admin configurado → inicio
     if (ADMIN_EMAIL && user.email !== ADMIN_EMAIL) {
-      return redirect('/?error=unauthorized');
+      return redirect('/');
     }
 
-    // Pasar el usuario al contexto para que las páginas lo usen
+    // Sesión válida → mostrar panel
     context.locals.user = user;
     return next();
 
   } catch {
-    return redirect('/login?next=' + encodeURIComponent(pathname));
+    return redirect('/');
   }
 });

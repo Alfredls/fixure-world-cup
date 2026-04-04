@@ -14,9 +14,7 @@ if (accessToken) {
   }
 }
 
-// Validar que nextUrl sea una ruta interna (previene open redirect)
-const rawNext = Astro.url.searchParams.get('next') || '/admin';
-const nextUrl = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/admin';
+// Siempre redirige al panel admin — no se acepta ?next= externo
 const errorParam = Astro.url.searchParams.get('error');
 ---
 
@@ -218,7 +216,7 @@ const errorParam = Astro.url.searchParams.get('error');
 
 
 
-    <script define:vars={{ supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL, supabaseAnon: import.meta.env.PUBLIC_SUPABASE_ANON_KEY, nextUrl }}>
+    <script define:vars={{ supabaseUrl: import.meta.env.PUBLIC_SUPABASE_URL, supabaseAnon: import.meta.env.PUBLIC_SUPABASE_ANON_KEY }}>
       const form = document.getElementById('login-form');
       const btnLogin = document.getElementById('login-btn');
       const errorContainer = document.getElementById('error-container');
@@ -269,7 +267,7 @@ const errorParam = Astro.url.searchParams.get('error');
           document.cookie = `sb-access-token=${data.access_token}; path=/; expires=${expires}; SameSite=Strict; Secure`;
           document.cookie = `sb-refresh-token=${data.refresh_token}; path=/; expires=${expires}; SameSite=Strict; Secure`;
 
-          window.location.href = nextUrl;
+          window.location.href = '/admin';
         } catch (err) {
           showError('Error de conexión. Intenta de nuevo.');
           btnLogin.classList.remove('loading');
