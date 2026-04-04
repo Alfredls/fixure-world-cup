@@ -1,10 +1,30 @@
 ---
+import { createClient } from '@supabase/supabase-js';
+
 const pathname = new URL(Astro.request.url).pathname;
 const isHome = pathname === "/" || pathname === "/index.html";
 const isGroups =
   pathname.startsWith("/groups") || pathname.startsWith("/group/");
 const isHistory =
   pathname.startsWith("/history") || pathname.startsWith("/bracket");
+
+// Detectar sesión admin para mostrar accesos condicionales
+const accessToken = Astro.cookies.get('sb-access-token')?.value;
+let isLoggedIn = false;
+let isAdmin = false;
+
+if (accessToken) {
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  );
+  const { data: { user } } = await supabase.auth.getUser(accessToken);
+  if (user) {
+    isLoggedIn = true;
+    const adminEmail = import.meta.env.ADMIN_EMAIL;
+    isAdmin = !adminEmail || user.email === adminEmail;
+  }
+}
 
 const dataMenu = [
   {
@@ -54,24 +74,46 @@ const dataMenu = [
       }
     </ul>
 
-    <!-- Right Controls -->
-    <div class="flex items-center gap-6 z-50  md:hidden">
+    <!-- Right Controls (Desktop: admin/logout + mobile: hamburger) -->
+    <div class="flex items-center gap-3 z-50">
 
-        <!-- Animated Hamburger Icon (Mobile) -->
-        <button id="menu-toggle" class="md:hidden text-white p-2 focus:outline-none z-50 relative w-10 h-10 flex items-center justify-center pt-2" aria-label="Toggle Menu">
-            <div class="relative w-6 h-5">
-                <span id="line-1" class="absolute top-0 left-0 w-full h-0.5 bg-white transition-all duration-300 transform-gpu"></span>
-                <span id="line-2" class="absolute top-[9px] left-0 w-full h-0.5 bg-white transition-all duration-300"></span>
-                <span id="line-3" class="absolute bottom-0 left-0 w-full h-0.5 bg-white transition-all duration-300 transform-gpu"></span>
-            </div>
-        </button>
+      {/* Admin link — solo si es admin */}
+      {isAdmin && (
+        <a
+          href="/admin"
+          class="hidden md:inline-flex items-center gap-1.5 text-xs tracking-widest uppercase font-bold text-gold/70 hover:text-gold border border-gold/20 hover:border-gold/50 px-3 py-1.5 rounded-lg transition-all duration-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="15" rx="1"/></svg>
+          Admin
+        </a>
+      )}
+
+      {/* Logout — solo si está logueado */}
+      {isLoggedIn && (
+        <a
+          href="/admin/logout"
+          class="hidden md:inline-flex items-center gap-1.5 text-xs tracking-widest uppercase font-bold text-white/30 hover:text-white/70 transition-colors duration-200"
+          title="Cerrar sesión"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          Salir
+        </a>
+      )}
+
+      <!-- Animated Hamburger Icon (Mobile) -->
+      <button id="menu-toggle" class="md:hidden text-white p-2 focus:outline-none z-50 relative w-10 h-10 flex items-center justify-center pt-2" aria-label="Toggle Menu">
+          <div class="relative w-6 h-5">
+              <span id="line-1" class="absolute top-0 left-0 w-full h-0.5 bg-white transition-all duration-300 transform-gpu"></span>
+              <span id="line-2" class="absolute top-[9px] left-0 w-full h-0.5 bg-white transition-all duration-300"></span>
+              <span id="line-3" class="absolute bottom-0 left-0 w-full h-0.5 bg-white transition-all duration-300 transform-gpu"></span>
+          </div>
+      </button>
     </div>
   </nav>
 
   <!-- Mobile Menu Overlay -->
   <div id="mobile-menu" class="fixed inset-0 h-[100dvh] bg-[#0a0a0a]/98 backdrop-blur-2xl z-[40] flex flex-col items-center justify-center gap-8 md:hidden transition-all duration-300 opacity-0 pointer-events-none scale-95">
-    {
-      dataMenu.map((item) => (
+    {dataMenu.map((item) => (
         <a
           href={item.url}
           class={`text-3xl font-bebas tracking-[4px] uppercase ${item.isActive ? "text-gold" : "text-white/60 hover:text-white transition-colors"}`}
@@ -80,6 +122,22 @@ const dataMenu = [
         </a>
       ))
     }
+
+    {/* Separador + accesos de sesión en mobile */}
+    {isLoggedIn && (
+      <div class="flex flex-col items-center gap-4 mt-4 pt-4 border-t border-white/10 w-48">
+        {isAdmin && (
+          <a href="/admin" class="text-xl font-bebas tracking-[3px] uppercase text-gold/70 hover:text-gold transition-colors flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="15" rx="1"/></svg>
+            Panel Admin
+          </a>
+        )}
+        <a href="/admin/logout" class="text-xl font-bebas tracking-[3px] uppercase text-white/30 hover:text-white/70 transition-colors flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          Cerrar Sesión
+        </a>
+      </div>
+    )}
   </div>
 </header>
 
