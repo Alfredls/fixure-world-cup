@@ -18,6 +18,7 @@ const groupedMatches = matches.reduce((acc: Record<string, CalendarMatch[]>, mat
 }, {});
 
 const sortedDates = Object.keys(groupedMatches).sort();
+const todayStr = new Date().toISOString().split('T')[0];
 ---
 
 <Layout title="Calendario | Mundial 2026">
@@ -48,16 +49,19 @@ const sortedDates = Object.keys(groupedMatches).sort();
                     <p class="text-white/50 text-sm max-w-sm px-6">Ningún partido coincide con los filtros de fecha, grupo y equipo.</p>
                 </div>
 
-                {sortedDates.map((date, index) => (
-                    <div class="timeline-day-group transition-all duration-500 ease-in-out" data-date={date}>
-                        <TimelineRow 
-                            date={date as string} 
-                            dayMatches={groupedMatches[date as string]} 
-                            index={index} 
-                            isLast={index === sortedDates.length - 1} 
-                        />
-                    </div>
-                ))}
+                {sortedDates.map((date, index) => {
+                    const isPast = date < todayStr;
+                    return (
+                        <div class="timeline-day-group transition-all duration-500 ease-in-out" data-date={date}>
+                            <TimelineRow 
+                                date={date as string} 
+                                dayMatches={groupedMatches[date as string]} 
+                                index={index} 
+                                isLast={index === sortedDates.length - 1} 
+                            />
+                        </div>
+                    );
+                })}
             </div>
         </div>
     </div>

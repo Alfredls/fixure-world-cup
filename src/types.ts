@@ -22,6 +22,7 @@ export interface CalendarMatch extends BaseMatch {
     time: string;
     venue: string;
     city: string;
+    score?: MatchScore;
 }
 
 export interface LiveMatchData extends BaseMatch {

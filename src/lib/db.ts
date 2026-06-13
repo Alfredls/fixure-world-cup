@@ -38,8 +38,8 @@ export async function getMatchesByDate(date: string) {
 }
 
 const mockCalendarMatches = [
-  { id: 1, homeTeam: { name: 'México', flag: 'mex.png' }, awayTeam: { name: 'Sudáfrica', flag: 'rsa.png' }, date: '2026-06-11', time: '15:00 Hrs.', venue: 'Estadio Azteca', city: 'Ciudad de México', phase: 'group', group: 'Grupo A', status: 'scheduled' },
-  { id: 2, homeTeam: { name: 'Canadá', flag: 'can.png' }, awayTeam: { name: 'Suiza', flag: 'sui.png' }, date: '2026-06-12', time: '15:00 Hrs.', venue: 'BMO Field', city: 'Toronto', phase: 'group', group: 'Grupo B', status: 'scheduled' },
+  { id: 1, homeTeam: { name: 'México', flag: 'mex.png' }, awayTeam: { name: 'Sudáfrica', flag: 'rsa.png' }, date: '2026-06-11', time: '15:00 Hrs.', venue: 'Estadio Azteca', city: 'Ciudad de México', phase: 'group', group: 'Grupo A', status: 'finished', score: { home: 1, away: 1 } },
+  { id: 2, homeTeam: { name: 'Canadá', flag: 'can.png' }, awayTeam: { name: 'Suiza', flag: 'sui.png' }, date: '2026-06-12', time: '15:00 Hrs.', venue: 'BMO Field', city: 'Toronto', phase: 'group', group: 'Grupo B', status: 'finished', score: { home: 2, away: 0 } },
   { id: 3, homeTeam: { name: 'EE.UU.', flag: 'usa.png' }, awayTeam: { name: 'Paraguay', flag: 'par.png' }, date: '2026-06-12', time: '21:00 Hrs.', venue: 'SoFi Stadium', city: 'Los Angeles', phase: 'group', group: 'Grupo D', status: 'scheduled' },
   { id: 4, homeTeam: { name: 'Brasil', flag: 'bra.png' }, awayTeam: { name: 'Marruecos', flag: 'mar.png' }, date: '2026-06-13', time: '18:00 Hrs.', venue: 'MetLife Stadium', city: 'New York/NJ', phase: 'group', group: 'Grupo C', status: 'scheduled' },
 ];
@@ -54,6 +54,8 @@ export async function getAllCalendarMatches() {
         status,
         phase,
         group_id,
+        home_score,
+        away_score,
         home_team:teams!home_team_id(name, flag_emoji),
         away_team:teams!away_team_id(name, flag_emoji),
         venue:venues(name, city)
@@ -81,7 +83,8 @@ export async function getAllCalendarMatches() {
       city: venueInfo?.city || '',
       phase: m.phase,
       group: m.group_id ? `Grupo ${m.group_id}` : '',
-      status: m.status
+      status: m.status,
+      score: (m.home_score !== null && m.away_score !== null && m.home_score !== undefined) ? { home: m.home_score, away: m.away_score } : undefined
     };
   });
 }

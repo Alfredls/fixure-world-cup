@@ -153,19 +153,26 @@ const dataMenu = [
         if (!header || !menuToggle || !mobileMenu) return;
 
         // Scroll effect (Glassmorphism)
+        let ticking = false;
         const handleScroll = () => {
-            if (window.scrollY > 20) {
-                header.classList.add('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
-                header.classList.remove('h-[80px]');
-                header.classList.add('h-[70px]');
-            } else {
-                header.classList.remove('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
-                header.classList.remove('h-[70px]');
-                header.classList.add('h-[80px]');
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (window.scrollY > 20) {
+                        header.classList.add('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
+                        header.classList.remove('h-[80px]');
+                        header.classList.add('h-[70px]');
+                    } else {
+                        header.classList.remove('bg-black/20', 'backdrop-blur-lg', 'border-white/5', 'py-1');
+                        header.classList.remove('h-[70px]');
+                        header.classList.add('h-[80px]');
+                    }
+                    ticking = false;
+                });
+                ticking = true;
             }
         };
 
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
 
         // Mobile menu toggle
         const toggleMenu = () => {

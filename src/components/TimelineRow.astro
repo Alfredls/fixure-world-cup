@@ -90,10 +90,20 @@ const nextColor = getDateColor(index + 1);
                             <span class="text-xl md:text-2xl font-bebas text-white tracking-widest group-hover/card:text-white transition-colors duration-500">{match.homeTeam.name}</span>
                         </div>
 
-                        <div class="flex items-center justify-center gap-6 opacity-20 group-hover/card:opacity-40 transition-opacity duration-700">
-                            <div class="h-[1px] w-12 bg-white/50 hidden md:block"></div>
-                            <span class="font-bebas text-4xl text-white">VS</span>
-                            <div class="h-[1px] w-12 bg-white/50 hidden md:block"></div>
+                        <div class={`flex items-center justify-center gap-4 md:gap-6 ${match.score ? 'opacity-100' : 'opacity-20 group-hover/card:opacity-40'} transition-opacity duration-700`}>
+                            {match.score ? (
+                                <>
+                                    <span class="font-bebas text-4xl md:text-5xl text-gold">{match.score.home}</span>
+                                    <span class="font-bebas text-2xl text-white/50">-</span>
+                                    <span class="font-bebas text-4xl md:text-5xl text-gold">{match.score.away}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <div class="h-[1px] w-8 md:w-12 bg-white/50 hidden md:block"></div>
+                                    <span class="font-bebas text-3xl md:text-4xl text-white">VS</span>
+                                    <div class="h-[1px] w-8 md:w-12 bg-white/50 hidden md:block"></div>
+                                </>
+                            )}
                         </div>
 
                         <div class="flex items-center lg:flex-row-reverse gap-6 group/team text-right flex-col lg:flex-row">

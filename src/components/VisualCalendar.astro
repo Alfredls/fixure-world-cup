@@ -5,22 +5,25 @@ interface Props {
 
 const { activeDates } = Astro.props;
 
-// Calculamos las fechas desde el primer hasta el último partido para la Cinta
-const startStr = activeDates.length > 0 ? activeDates[0] : '2026-06-11';
-const endStr = activeDates.length > 0 ? activeDates[activeDates.length - 1] : '2026-07-19';
+const sortedActiveDates = [...activeDates].sort();
+const startStr = sortedActiveDates.length > 0 ? sortedActiveDates[0] : '2026-06-11';
+const endStr = sortedActiveDates.length > 0 ? sortedActiveDates[sortedActiveDates.length - 1] : '2026-07-19';
 
 const startDate = new Date(startStr + 'T12:00:00');
 const endDate = new Date(endStr + 'T12:00:00');
-const allDates: string[] = [];
+const tempDates: string[] = [];
 
 let current = new Date(startDate);
 while (current <= endDate) {
   const yyyy = current.getFullYear();
   const mm = String(current.getMonth() + 1).padStart(2, '0');
   const dd = String(current.getDate()).padStart(2, '0');
-  allDates.push(`${yyyy}-${mm}-${dd}`);
+  tempDates.push(`${yyyy}-${mm}-${dd}`);
   current.setDate(current.getDate() + 1);
 }
+
+const todayStr = new Date().toISOString().split('T')[0];
+const allDates = tempDates;
 
 // Helpers
 const getDayName = (dateStr: string) => {
@@ -91,12 +94,14 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
             {allDates.map((dateStr) => {
                 const isActive = activeDates.includes(dateStr);
+                const isPast = dateStr < todayStr;
                 return (
                     <button 
                         class={`calendar-date-btn snap-center flex flex-col items-center justify-center min-w-[70px] h-20 rounded-2xl border outline-none transition-all duration-300 shrink-0 relative
                         ${isActive 
                             ? 'bg-white/5 border-white/10 hover:border-gold/50 hover:bg-white/10 cursor-pointer' 
-                            : 'bg-transparent border-white/5 opacity-30 cursor-not-allowed hover:opacity-50'}`}
+                            : 'bg-transparent border-white/5 opacity-30 cursor-not-allowed hover:opacity-50'}
+                        ${isPast ? 'opacity-40 grayscale-[50%]' : ''}`}
                         data-target-date={isActive ? dateStr : ''}
                         disabled={!isActive}
                     >
@@ -137,13 +142,14 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                     {juneDays.map(dateStr => {
                         if (!dateStr) return <div class="w-full aspect-square"></div>;
                         const isActive = activeDates.includes(dateStr);
+                        const isPast = dateStr < todayStr;
                         return (
                             <button 
                                 class={`calendar-date-btn relative w-full aspect-square flex items-center justify-center rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-all duration-300 outline-none
                                 ${isActive 
                                     ? 'bg-white/5 border border-white/10 hover:border-gold/50 hover:bg-gold/10 text-white cursor-pointer hover:scale-110 shadow-lg' 
                                     : 'text-white/20 cursor-not-allowed hover:bg-white/5 border border-transparent'}
-                                `}
+                                ${isPast ? 'opacity-40 grayscale-[50%]' : ''}`}
                                 data-target-date={isActive ? dateStr : ''}
                                 disabled={!isActive}
                             >
@@ -173,13 +179,14 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                     {julyDays.map(dateStr => {
                         if (!dateStr) return <div class="w-full aspect-square"></div>;
                         const isActive = activeDates.includes(dateStr);
+                        const isPast = dateStr < todayStr;
                         return (
                             <button 
                                 class={`calendar-date-btn relative w-full aspect-square flex items-center justify-center rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-all duration-300 outline-none
                                 ${isActive 
                                     ? 'bg-white/5 border border-white/10 hover:border-gold/50 hover:bg-gold/10 text-white cursor-pointer hover:scale-110 shadow-lg' 
                                     : 'text-white/20 cursor-not-allowed hover:bg-white/5 border border-transparent'}
-                                `}
+                                ${isPast ? 'opacity-40 grayscale-[50%]' : ''}`}
                                 data-target-date={isActive ? dateStr : ''}
                                 disabled={!isActive}
                             >
@@ -306,12 +313,6 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                         v.classList.remove('animate-fade-in');
                     }
                 });
-
-                // Reset filters on tab switch
-                const clearBtn = document.getElementById('btn-clear-filters');
-                if (clearBtn) {
-                    clearBtn.click();
-                }
             });
         });
 
@@ -336,7 +337,24 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
         const groupSelect = document.getElementById('group-filter-select') as HTMLSelectElement;
         const teamSearch = document.getElementById('team-search-input') as HTMLInputElement;
 
-        let currentActiveDate = 'all';
+        const todayStrLocal = new Date().toISOString().split('T')[0];
+        let initialDate = 'all';
+        
+        const todayBtn = document.querySelector(`#ribbon-container .calendar-date-btn[data-target-date="${todayStrLocal}"]:not([disabled])`);
+        if (todayBtn) {
+            initialDate = todayStrLocal;
+        } else {
+            const allAvailableBtns = document.querySelectorAll('#ribbon-container .calendar-date-btn[data-target-date]:not([data-target-date="all"]):not([disabled])');
+            for (let i = 0; i < allAvailableBtns.length; i++) {
+                const date = allAvailableBtns[i].getAttribute('data-target-date');
+                if (date && date >= todayStrLocal) {
+                    initialDate = date;
+                    break;
+                }
+            }
+        }
+
+        let currentActiveDate = initialDate;
         let currentGroup = 'all';
         let currentTeam = '';
 
@@ -457,6 +475,21 @@ const daysOfWeek = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
                 applyFilters();
             };
         }
+
+        // Apply initial filter based on the current active date
+        if (initialDate !== 'all') {
+            dateButtons.forEach(b => b.classList.remove('active'));
+            const matchedButtons = document.querySelectorAll(`.calendar-date-btn[data-target-date="${initialDate}"]`);
+            matchedButtons.forEach(b => b.classList.add('active'));
+            
+            setTimeout(() => {
+                const activeBtn = document.querySelector(`#ribbon-container .calendar-date-btn[data-target-date="${initialDate}"]`);
+                if (activeBtn) {
+                    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }, 100);
+        }
+        applyFilters();
     }
 
     // Initialize on first load and after view transitions

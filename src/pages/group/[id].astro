@@ -76,7 +76,7 @@ const { data: matchesData } = await supabase
     .order('match_time', { ascending: true });
 
 if (matchesData && matchesData.length > 0) {
-    matches = matchesData.map((m: any) => {
+    const rawMatches = matchesData.map((m: any) => {
         const home = Array.isArray(m.home_team) ? m.home_team[0] : m.home_team;
         const away = Array.isArray(m.away_team) ? m.away_team[0] : m.away_team;
         const venueInfo = Array.isArray(m.venue) ? m.venue[0] : m.venue;
@@ -94,6 +94,10 @@ if (matchesData && matchesData.length > 0) {
             status: m.status
         };
     });
+
+    const upcomingMatches = rawMatches.filter((m: any) => m.status !== 'finished');
+    const finishedMatches = rawMatches.filter((m: any) => m.status === 'finished');
+    matches = [...upcomingMatches, ...finishedMatches];
 }
 
 // Fallback preventivo si no hay datos
@@ -136,13 +140,13 @@ if (matches.length === 0) {
             <section class="mb-16">
                 <div class="flex items-center gap-4 mb-10">
                     <h2 class="text-2xl md:text-3xl font-bebas text-white tracking-[2px]">PARTIDOS DEL GRUPO</h2>
-                    <div class="h-[1px] flex-1 bg-white/10"></div>
+                    <div class="h-px flex-1 bg-white/10"></div>
                 </div>
                 
                 <div class="flex flex-col gap-10">
                     {matches.map((match: any) => (
-                        <div class="relative group/match">
-                            <div class="bg-white/[0.03] border border-white/5 rounded-[30px] p-4 md:p-5 backdrop-blur-2xl hover:border-white/20 transition-all duration-700 relative overflow-hidden group/card shadow-2xl">
+                        <div class="relative group/match transition-all duration-500 ease-in-out">
+                            <div class="bg-white/3 border border-white/5 rounded-[30px] p-4 md:p-5 backdrop-blur-2xl hover:border-white/20 transition-all duration-700 relative overflow-hidden group/card shadow-2xl">
                                 <div class="absolute inset-0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-700 pointer-events-none bg-[radial-gradient(circle_at_center,var(--color-gold),transparent_80%)]"></div>
 
                                 <div class="flex flex-col items-center gap-1 mb-6">
@@ -176,9 +180,9 @@ if (matches.length === 0) {
                                     <div class="flex items-center justify-center gap-4 min-w-[100px]">
                                         {match.status === 'scheduled' ? (
                                             <div class="flex items-center gap-4 opacity-20">
-                                                <div class="h-[1px] w-6 bg-white/50"></div>
+                                                <div class="h-px w-6 bg-white/50"></div>
                                                 <span class="font-bebas text-2xl text-white">VS</span>
-                                                <div class="h-[1px] w-6 bg-white/50"></div>
+                                                <div class="h-px w-6 bg-white/50"></div>
                                             </div>
                                         ) : (
                                             <div class="flex items-center gap-6">
