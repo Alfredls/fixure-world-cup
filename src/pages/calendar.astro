@@ -52,7 +52,7 @@ const todayStr = new Date().toISOString().split('T')[0];
                 {sortedDates.map((date, index) => {
                     const isPast = date < todayStr;
                     return (
-                        <div class="timeline-day-group transition-all duration-500 ease-in-out" data-date={date}>
+                        <div class="timeline-day-group content-vis-auto transition-all duration-500 ease-in-out" data-date={date}>
                             <TimelineRow 
                                 date={date as string} 
                                 dayMatches={groupedMatches[date as string]} 

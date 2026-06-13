@@ -604,6 +604,9 @@ body {
   /* Sync card — padding reducido */
   .sync-card { padding: 1.5rem; }
 
+  /* Match header — apilar en tablet y mobile */
+  .match-header { flex-direction: column; gap: 1.5rem; padding: 1.25rem; }
+
   /* API info — de 2 columnas a 1 */
   .api-info-grid { grid-template-columns: 1fr; gap: 1rem; }
 }
@@ -614,9 +617,6 @@ body {
 
   /* Sync card — padding mínimo */
   .sync-card { padding: 1.25rem; }
-
-  /* Match header — cambiar dirección vertical en XS */
-  .match-header { flex-direction: column; gap: 1rem; }
 
   /* Score controls — tamaño reducido */
   .score-btn { width: 44px; height: 44px; }
