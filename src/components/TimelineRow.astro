@@ -58,7 +58,7 @@ const nextColor = getDateColor(index + 1);
     <div class="flex-1 flex flex-col gap-8 ml-4 sm:ml-0">
         {dayMatches.map((match) => (
             <div 
-                class="relative group/match match-card-item transition-all duration-300 transform" 
+                class="relative group/match match-card-item transition duration-300 transform" 
                 data-group={match.group || ''} 
                 data-hometeam={(match.homeTeam.name || '').toLowerCase()} 
                 data-awayteam={(match.awayTeam.name || '').toLowerCase()}
@@ -68,7 +68,7 @@ const nextColor = getDateColor(index + 1);
                     style={`background-color: ${color}`}
                 ></div>
 
-                <div class="bg-white/[0.03] border border-white/5 rounded-[40px] p-4 md:p-6 md:backdrop-blur-2xl backdrop-blur-md hover:border-white/20 transition-all duration-700 relative overflow-hidden group/card shadow-2xl">
+                <div class="bg-white/[0.03] border border-white/5 rounded-[40px] p-4 md:p-6 md:backdrop-blur-2xl backdrop-blur-md hover:border-white/20 transition duration-500 relative overflow-hidden group/card shadow-2xl">
                     <div 
                         class="absolute inset-0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-700 pointer-events-none"
                         style={`background: radial-gradient(circle at center, ${color}, transparent 80%)`}
@@ -80,7 +80,7 @@ const nextColor = getDateColor(index + 1);
 
                     <div class="flex flex-row lg:items-center justify-center lg:justify-between gap-4 lg:gap-10 mb-5">
                         <div class="flex items-center gap-6 group/team flex-col lg:flex-row">
-                            <div class="w-16 h-16 rounded-full bg-white/5 p-1.5 border border-white/10 group-hover/card:border-white/30 transition-all duration-700 overflow-hidden shadow-2xl transform group-hover/card:scale-105">
+                            <div class="w-16 h-16 rounded-full bg-white/5 p-1.5 border border-white/10 group-hover/card:border-white/30 transition duration-500 overflow-hidden shadow-2xl transform group-hover/card:scale-105">
                                 {typeof resolveFlag(match.homeTeam.flag) === 'string' ? (
                                     <img src={resolveFlag(match.homeTeam.flag) as string} alt="" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-full" />
                                 ) : (
@@ -107,7 +107,7 @@ const nextColor = getDateColor(index + 1);
                         </div>
 
                         <div class="flex items-center lg:flex-row-reverse gap-6 group/team text-right flex-col lg:flex-row">
-                            <div class="w-16 h-16 rounded-full bg-white/5 p-1.5 border border-white/10 group-hover/card:border-white/30 transition-all duration-700 overflow-hidden shadow-2xl transform group-hover/card:scale-105">
+                            <div class="w-16 h-16 rounded-full bg-white/5 p-1.5 border border-white/10 group-hover/card:border-white/30 transition duration-500 overflow-hidden shadow-2xl transform group-hover/card:scale-105">
                                 {typeof resolveFlag(match.awayTeam.flag) === 'string' ? (
                                     <img src={resolveFlag(match.awayTeam.flag) as string} alt="" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-full" />
                                 ) : (

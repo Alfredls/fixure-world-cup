@@ -145,7 +145,7 @@ const finalRound = finalMatchRaw.length > 0 ? { name: "Final", matches: finalMat
                     {leftBracket.map((round, roundIdx) => (
                         <div class="flex flex-col gap-8 md:gap-12 w-[220px] md:w-[260px] shrink-0 stretch self-stretch">
                             <!-- Round Header -->
-                            <div class="bg-white/[0.04] border border-white/10 backdrop-blur-3xl px-6 py-4 md:px-10 md:py-6 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group hover:border-gold/40 transition-all duration-700 h-[80px] md:h-[100px] flex items-center justify-center">
+                            <div class="bg-white/[0.04] border border-white/10 backdrop-blur-3xl px-6 py-4 md:px-10 md:py-6 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group hover:border-gold/40 transition duration-500 h-[80px] md:h-[100px] flex items-center justify-center">
                                 <h2 class="text-white font-bebas text-2xl md:text-3xl tracking-[4px] text-center group-hover:text-gold transition-colors block">{round.name.toUpperCase()}</h2>
                             </div>
                             <!-- Matches Group -->
@@ -156,7 +156,7 @@ const finalRound = finalMatchRaw.length > 0 ? { name: "Final", matches: finalMat
                                         {pair.map((match, idx) => (
                                             <div class="relative flex-1 flex flex-col justify-center px-0 py-1">
                                                 <div class="relative w-full z-10">
-                                                    <div class="hover:scale-[1.05] hover:z-20 transition-all duration-500 will-change-transform cursor-pointer relative z-10 w-full">
+                                                    <div class="hover:scale-[1.05] hover:z-20 transition duration-300 cursor-pointer relative z-10 w-full">
                                                         <KnockoutMatch match={match} />
                                                     </div>
                                                 </div>
@@ -200,7 +200,7 @@ const finalRound = finalMatchRaw.length > 0 ? { name: "Final", matches: finalMat
                     {/* --- CORE: FINAL --- */}
                     <div class="flex flex-col gap-12 md:gap-20 w-[240px] md:w-[300px] h-full shrink-0">
                         {/* Final Header */}
-                        <div class="bg-gradient-to-b from-gold/20 to-transparent border border-gold/40 backdrop-blur-3xl px-6 py-6 md:px-10 md:py-8 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(206,171,82,0.2)] group hover:border-gold/60 transition-all duration-700">
+                        <div class="bg-gradient-to-b from-gold/20 to-transparent border border-gold/40 backdrop-blur-3xl px-6 py-6 md:px-10 md:py-8 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(206,171,82,0.2)] group hover:border-gold/60 transition duration-500">
                             <h2 class="text-white font-bebas text-3xl md:text-5xl tracking-[6px] text-center drop-shadow-[0_0_15px_rgba(206,171,82,0.5)]">FINAL</h2>
                         </div>
 
@@ -216,7 +216,7 @@ const finalRound = finalMatchRaw.length > 0 ? { name: "Final", matches: finalMat
                             </div>
                             
                             {/* Final Match Card */}
-                            <div class="relative z-10 w-full hover:scale-[1.05] hover:z-20 transition-all duration-500 will-change-transform cursor-pointer shadow-[0_0_40px_rgba(206,171,82,0.2)] rounded-2xl">
+                            <div class="relative z-10 w-full hover:scale-[1.05] hover:z-20 transition duration-300 cursor-pointer shadow-[0_0_40px_rgba(206,171,82,0.2)] rounded-2xl">
                                 <KnockoutMatch match={finalRound.matches[0]} />
                             </div>
 
@@ -228,7 +228,7 @@ const finalRound = finalMatchRaw.length > 0 ? { name: "Final", matches: finalMat
                     {rightBracket.map((round, roundIdx) => (
                         <div class="flex flex-col gap-8 md:gap-12 w-[220px] md:w-[260px] shrink-0 stretch self-stretch">
                             <!-- Round Header -->
-                            <div class="bg-white/[0.04] border border-white/10 backdrop-blur-3xl px-6 py-4 md:px-10 md:py-6 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group hover:border-gold/40 transition-all duration-700 h-[80px] md:h-[100px] flex items-center justify-center">
+                            <div class="bg-white/[0.04] border border-white/10 backdrop-blur-3xl px-6 py-4 md:px-10 md:py-6 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group hover:border-gold/40 transition duration-500 h-[80px] md:h-[100px] flex items-center justify-center">
                                 <h2 class="text-white font-bebas text-2xl md:text-3xl tracking-[4px] text-center group-hover:text-gold transition-colors block">{round.name.toUpperCase()}</h2>
                             </div>
                             <!-- Matches Group -->
@@ -239,7 +239,7 @@ const finalRound = finalMatchRaw.length > 0 ? { name: "Final", matches: finalMat
                                         {pair.map((match, idx) => (
                                             <div class="relative flex-1 flex flex-col justify-center px-0 py-1">
                                                 <div class="relative w-full z-10">
-                                                    <div class="hover:scale-[1.05] hover:z-20 transition-all duration-500 will-change-transform cursor-pointer relative z-10 w-full">
+                                                    <div class="hover:scale-[1.05] hover:z-20 transition duration-300 cursor-pointer relative z-10 w-full">
                                                         <KnockoutMatch match={match} />
                                                     </div>
                                                 </div>
